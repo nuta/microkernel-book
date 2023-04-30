@@ -113,3 +113,9 @@ Breakpoint 1, bootfs_read (file=0x2e00d7d4, off=0, buf=0x2e6a3060, len=4096) at 
 Backtrace stopped: frame did not save the PC
 (gdb)
 ```
+
+### QEMUにprintfデバッグを追加する
+
+HinaOSではなくQEMU自体にprintfを入れたり、QEMU自体にデバッガをアタッチして挙動を観察するのも有効なデバッグ手段です。例えば、virtioデバイスがうまく動いていない場合、virtioデバイスのエミュレーション部分にprintfをたくさん入れて、どこまで処理が進んでいるのか、どこで中断されているのかを確認することができます。
+
+なお、QEMUにはトレース機能 ([ドキュメント](https://qemu-project.gitlab.io/qemu/devel/tracing.html)) が備わっていますが、自身で知りたい情報をprintfで出力する方が正直楽です。
