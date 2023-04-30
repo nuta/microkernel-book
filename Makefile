@@ -90,7 +90,6 @@ ADDR2LINE := $(LLVM_PREFIX)llvm-addr2line$(LLVM_SUFFIX)
 NM        := $(LLVM_PREFIX)llvm-nm$(LLVM_SUFFIX)
 GDB       ?= riscv64-unknown-elf-gdb
 PROGRESS  ?= printf "  \\033[1;96m%8s\\033[0m  \\033[1;m%s\\033[0m\\n"
-DOXYGEN   ?= doxygen
 PYTHON3   ?= python3
 CP        ?= cp
 MKDIR     ?= mkdir
@@ -185,12 +184,6 @@ test:
 		--qemu "$(QEMU)" --make "$(MAKE)"                              \
 		$(if $(FLAKE_RUNS),--flake-finder --flake-runs=$(FLAKE_RUNS))  \
 		$(if $(RELEASE),--release,)
-
-# Doxygenを使ってソースコードのドキュメントを生成するコマンド
-.PHONY: doxygen
-doxygen:
-	mkdir -p $(BUILD_DIR)
-	$(DOXYGEN) Doxyfile
 
 # トラブルシューティングに役立つ情報を表示するコマンド
 .PHONY: doctor
