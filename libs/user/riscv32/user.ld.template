@@ -1,0 +1,49 @@
+// ユーザープログラムのリンカスクリプトのテンプレート。仮想アドレス上のレイアウトを指定するもの。
+//
+// 実際に使われるリンカスクリプトは次のコマンドで生成される:
+//
+//   clang -E -include build/user_ld_params.h このファイル -o リンカスクリプト
+//
+// -Eが指定されているので、このファイルはプリプロセッサによってマクロ展開されるだけで終了する。
+// C言語以外のテキストファイルで #ifdef/#define が使える、ちょっとしたテクニック。
+//
+// user_ld_params.h は各サーバのUSER_BASE_ADDR/USER_SIZEを定義している。
+// -include オプションをつけることで、このファイルの先頭でインクルードされる。
+ENTRY(start)
+
+SECTIONS {
+    . = USER_BASE_ADDR;
+
+    .text : ALIGN(4096) {
+        *(.text .text.*);
+    }
+
+    .rodata : ALIGN(4096) {
+        *(.rodata .rodata.*);
+        . = ALIGN(16);
+        *(.srodata .srodata.*);
+        KEEP(*(.symbols));
+    }
+
+    .data : ALIGN(4096) {
+        *(.data .data.*);
+        *(.sdata .sdata.*);
+    }
+
+    .bss : ALIGN(4096) {
+        *(.bss .bss.*);
+        . = ALIGN(16);
+        *(.sbss .sbss.*);
+
+        // ヒープ領域 (mallocが管理)
+        __heap = .;
+        . += 4 * 1024 * 1024;  // 4MiB
+        __heap_end = .;
+
+        // スタック領域
+        . += 256 * 1024;  // 256KiB
+        __stack = .;
+
+        ASSERT(. <= (USER_BASE_ADDR + USER_SIZE), "too large user program");
+    }
+}

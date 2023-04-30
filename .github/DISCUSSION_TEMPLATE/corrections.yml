@@ -1,0 +1,14 @@
+body:
+  - type: textarea
+    attributes:
+      label: ページ番号 (図・表番号)
+      description: "例: P12 図3.4, P103-P105"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 概要
+      description: 誤字・脱字など修正すべき事項。
+      render: bash
+    validations:
+      required: true

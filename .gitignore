@@ -1,0 +1,7 @@
+/build
+/.vscode
+/.gdb_history
+*.log
+*.img
+*.pcap
+*.pyc

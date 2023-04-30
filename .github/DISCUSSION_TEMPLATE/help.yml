@@ -1,0 +1,20 @@
+body:
+  - type: textarea
+    attributes:
+      label: 概要
+      description: 困っていること・質問したいことをここに記述してください。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 開発環境
+      description: HinaOSのデバッグに困っている場合のみ。`make doctor` の実行結果を貼付すると楽です。
+      render: bash
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: ソースコードのURL
+      description: HinaOSのデバッグに困っている場合のみ。自身のGitHubリポジトリを共有してもらえると助かります。
+    validations:
+      required: false

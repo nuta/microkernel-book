@@ -1,0 +1,133 @@
+// HinaOSのメッセージ定義。カーネルや各サーバ・アプリケーションがメッセージパッシングで送りあう
+// メッセージ構造が定義されいている。
+//
+// 文法:
+//
+//    oneway メッセージ名(引数名: 型, ...);
+//
+//        一方向 (oneway) のメッセージを定義する。
+//
+//    rpc メッセージ名(引数名: 型, ...) -> (戻り値名: 型, ...);
+//
+//        リモートプロシージャコール (rpc) 形式の通信に利用するメッセージを定義する。
+//        最初の括弧には引数を、「->」を挟んで次の括弧には戻り値を記述し、それぞれ別の
+//        メッセージ定義が生成される。ただし、戻り値側のメッセージ関連の型には、名前に
+//        「_reply」という接尾辞が付加される。
+//
+// 利用可能な型:
+//
+//      int: 符号付き整数
+//     uint: 符号なし整数
+//     size: 符号なし整数 (「大きさ」を表す値に使う)
+//     task: タスクID
+//    paddr: 物理アドレス
+//    vaddr: 仮想アドレス
+//    uaddr: ユーザ空間を指す仮想アドレス
+//  cstr[N]: 最大Nバイトの文字列 (ヌル終端を含む)
+// bytes[N]: 最大Nバイトのバイト列
+// notifications: 通知メッセージのビットフィールド
+
+//
+// カーネル
+//
+
+// 例外メッセージ: タスクが正常終了した、無効な命令の実行を試みたなど
+oneway exception(task: task, reason: int);
+// ページフォルト
+rpc page_fault(task: task, uaddr: uaddr, ip: uaddr, fault: uint) -> ();
+// 通知メッセージ: libs/user内部でnotify_irqやnotify_timerメッセージに変換される
+oneway notify(notifications: notifications);
+
+//
+// libs/userライブラリ内部で使用されるメッセージ
+//
+
+// 割り込み通知メッセージ
+oneway notify_irq();
+// タイムアウト通知メッセージ (timeシステムコールで設定した時間になった)
+oneway notify_timer();
+// 非同期メッセージパッシング: 未受信のメッセージがある場合は、そのメッセージを返す
+rpc async_recv() -> (any);
+
+//
+// VMサーバ
+//
+
+// メッセージパッシングのテスト用。同じ値を返す。
+rpc ping(value: int) -> (value: int);
+// タスクの作成
+rpc spawn_task(name: cstr[32]) -> (task: task);
+// タスクの終了
+rpc destroy_task(task: task) -> ();
+// サービスディスカバリ: サービス名からタスクを検索
+rpc service_lookup(name: cstr[64]) -> (task: task);
+// サービスディスカバリ: タスク名の登録
+rpc service_register(name: cstr[64]) -> ();
+// タスクが終了した際にtask_destroyedメッセージを送信するように設定
+rpc watch_tasks() -> ();
+// タスクが終了した際に送られるメッセージ
+oneway task_destroyed(task: task);
+// 指定した物理メモリ領域をマップする。MMIO領域などをマップするために使用。
+rpc vm_map_physical(paddr: paddr, size: size, map_flags: int) -> (uaddr: uaddr);
+// 動的に物理メモリ領域を割り当てる。動的なメモリ領域を割り当てるために使用。
+rpc vm_alloc_physical(size: size, alloc_flags: int, map_flags: int) -> (uaddr: uaddr, paddr: paddr);
+
+//
+// ブロックデバイスドライバサーバ
+//
+
+// デバイスからの読み込み
+rpc blk_read(sector: uint, offset: size, len: size) -> (data: bytes[1024]);
+// デバイスへの書き込み
+rpc blk_write(sector: uint, offset: size, data: bytes[1024]) -> ();
+
+//
+// ネットワークデバイスドライバサーバ
+//
+
+// デバイスの初期化: デバイスドライバは受信パケットをこのメッセージを送信元に対して送り始める
+rpc net_open() -> (macaddr: uint8[6]);
+// 受信パケット: デバイスドライバは net_open RPCを呼び出したサーバに送信する
+oneway net_recv(payload: bytes[1500]);
+// 送信パケット
+rpc net_send(payload: bytes[1500]) -> ();
+
+//
+// ファイルシステムサーバ
+//
+
+// ファイルを開く
+rpc fs_open(path: cstr[256], flags: int) -> (fd: int);
+// ファイルを閉じる
+rpc fs_close(fd: int) -> ();
+// ファイルの読み込み
+rpc fs_read(fd: int, len: size) -> (data: bytes[1024]);
+// ファイルの書き込み
+rpc fs_write(fd: int, data: bytes[1024]) -> (written_len: size);
+// ディレクトリエントリの取得
+rpc fs_readdir(path: cstr[256], index: int) -> (name: cstr[256], type: int, filesize: size);
+// ファイルの作成
+rpc fs_mkfile(path: cstr[256]) -> ();
+// ディレクトリの作成
+rpc fs_mkdir(path: cstr[256]) -> ();
+// ファイル・ディレクトリの削除
+rpc fs_delete(path: cstr[256]) -> ();
+
+//
+// TCP/IPサーバ
+//
+
+// TCPソケットの作成・コネクションの確立 (アクティブオープン)
+rpc tcpip_connect(dst_addr: uint32, dst_port: uint16) -> (sock: int);
+// ソケットのクローズ
+rpc tcpip_close(sock: int) -> ();
+// TCP: データの送信
+rpc tcpip_write(sock: int, data: bytes[1024]) -> ();
+// TCP: 受信済みデータの取得
+rpc tcpip_read(sock: int) -> (data: bytes[1024]);
+// DNS: ホスト名からIPv4アドレスを取得
+rpc tcpip_dns_resolve(hostname: cstr[256]) -> (addr: uint32);
+// TCP/IPサーバからメッセージ: データが受信された。tcpip_read RPCを呼び出すべき。
+oneway tcpip_data(sock: int);
+// TCP/IPサーバからメッセージ: ソケットがクローズされた
+oneway tcpip_closed(sock: int);

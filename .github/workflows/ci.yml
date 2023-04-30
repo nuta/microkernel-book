@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  linux_build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install -y llvm clang lld python3-pip qemu-system tshark
+      - name: Install pip packages
+        run: pip3 install --user -r tools/requirements.txt
+      - name: make doctor
+        run: make doctor
+      - name: Debug build
+        run: make build -j2
+      - name: Release build
+        run: make build -j2 RELEASE=1
+      - name: Run tests (debug build, 1 CPU)
+        run: make test -j2
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 1
+      - name: Run tests (release build, 1 CPU)
+        run: make test -j2 RELEASE=1
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 1
+      - name: Run tests (debug build, 4 CPUs)
+        run: make test -j2
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 4
+      - name: Run tests (release build, 4 CPUs)
+        run: make test -j2 RELEASE=1
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 4
+
+  macos_build:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install packages
+        run: brew install llvm python3 qemu
+      - name: Install pip packages
+        run: pip3 install --user -r tools/requirements.txt
+      - name: make doctor
+        run: make doctor
+      - name: Debug build
+        run: make build -j3
+      - name: Release build
+        run: make build -j3 RELEASE=1
+      - name: Run tests (debug build, 1 CPU)
+        run: make test -j3
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 1
+      - name: Run tests (release build, 1 CPU)
+        run: make test -j3 RELEASE=1
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 1
+      - name: Run tests (debug build, 4 CPUs)
+        run: make test -j3
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 4
+      - name: Run tests (release build, 4 CPUs)
+        run: make test -j3 RELEASE=1
+        env:
+          TEST_DEFAULT_TIMEOUT: 10
+          FLAKE_RUNS: 4
+          CPUS: 4
+
+  windows_build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Chocolatey packages
+        run: choco install qemu
+      - name: Install pip packages
+        run: py -m pip install --user -r tools/requirements.txt
+      - name: make doctor
+        run: make doctor
+      - name: Debug build
+        run: make build -j2
+      - name: Release build
+        run: make build -j2 RELEASE=1
+      - name: Run tests (debug build, 1 CPU)
+        run: make test -j2
+        env:
+          TEST_DEFAULT_TIMEOUT: 30
+          FLAKE_RUNS: 1
+          CPUS: 1
+          QEMU: C:\Program Files\qemu\qemu-system-riscv32
+      - name: Run tests (release build, 1 CPU)
+        run: make test -j2 RELEASE=1
+        env:
+          TEST_DEFAULT_TIMEOUT: 30
+          FLAKE_RUNS: 1
+          CPUS: 1
+          QEMU: C:\Program Files\qemu\qemu-system-riscv32
+      - name: Run tests (debug build, 2 CPUs)
+        run: make test -j2
+        env:
+          TEST_DEFAULT_TIMEOUT: 30
+          FLAKE_RUNS: 1
+          CPUS: 2
+          QEMU: C:\Program Files\qemu\qemu-system-riscv32
+      - name: Run tests (release build, 2 CPUs)
+        run: make test -j2 RELEASE=1
+        env:
+          TEST_DEFAULT_TIMEOUT: 30
+          FLAKE_RUNS: 1
+          CPUS: 2
+          QEMU: C:\Program Files\qemu\qemu-system-riscv32
+

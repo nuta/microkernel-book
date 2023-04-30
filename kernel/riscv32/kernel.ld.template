@@ -1,0 +1,67 @@
+// カーネルのリンカスクリプトのテンプレート。仮想アドレス上のレイアウトを指定するもの。
+//
+// 実際に使われるリンカスクリプトは次のコマンドで生成される:
+//
+//   clang -E このファイル -o リンカスクリプト
+//
+// -Eが指定されているので、このファイルはプリプロセッサによってマクロ展開されるだけで終了する。
+// C言語以外のテキストファイルで #ifdef/#define が使える、ちょっとしたテクニック。
+#include <buildconfig.h>
+
+ENTRY(boot)
+
+SECTIONS {
+    . = 0x80000000;
+    __ram_start = .;
+
+    .text : {
+        // ブートプログラムは 0x80000000 に来る必要がある
+        __text = .;
+        KEEP(*(.boot));
+
+        . = ALIGN(16);
+        *(.text .text.*);
+
+        . = ALIGN(4096);
+        __text_end = .;
+    }
+
+    __data = .;
+    .rodata : {
+        *(.rodata .rodata.*);
+        . = ALIGN(16);
+        *(.srodata .srodata.*);
+
+        KEEP(*(.symbols));
+
+        . = ALIGN(4096);
+        __boot_elf = .;
+        *(.boot_elf);
+        . = ALIGN(4096);
+    }
+
+    .data : {
+        . = ALIGN(16);
+        *(.data .data.*);
+        . = ALIGN(16);
+        *(.sdata .sdata.*);
+    }
+
+    .bss : {
+        __bss = .;
+        . = ALIGN(16);
+        *(.bss .bss.*);
+        . = ALIGN(16);
+        *(.sbss .sbss.*);
+        __bss_end = .;
+
+        . = ALIGN(4096);
+
+        __boot_stack = .;
+        . = . + NUM_CPUS_MAX * KERNEL_STACK_SIZE;
+    }
+
+    . = ALIGN(4096);
+    __data_end = .;
+    __free_ram_start = .;
+}

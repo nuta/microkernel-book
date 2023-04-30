@@ -1,0 +1,5 @@
+jinja2
+lark
+colorama
+pytest
+pytest-flakefinder

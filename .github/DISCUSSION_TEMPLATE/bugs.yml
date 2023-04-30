@@ -1,0 +1,14 @@
+body:
+  - type: textarea
+    attributes:
+      label: 概要
+      description: 操作手順やソースコードなど。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 開発環境
+      description: "`make doctor` の実行結果を貼付すると楽です。"
+      render: bash
+    validations:
+      required: true
