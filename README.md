@@ -51,14 +51,14 @@ $ git clone https://github.com/nuta/microkernel-book
 
 ## ビルド・実行
 
-次のコマンドでビルドできます。`-j8` は8並列ビルドを意味します。CPUコア数程度を指定すると良いでしょう。`V=1`や`RELEASE=1`はビルドオプションで、組み合わせて使うことができます。
+次のコマンドでビルドできます。`-j$(nproc)` は並列ビルドを意味します。`V=1`や`RELEASE=1`はビルドオプションで、組み合わせて使うことができます。
 
 ```
-$ make -j8              # OSをビルドする
-$ make -j8 V=1          # OSをビルドする (詳細なビルドログを出力)
-$ make -j8 RELEASE=1    # OSをビルドする (コンパイラのより高度な最適化を有効化)
-$ make -j8 run          # OSをビルドしてQEMUで実行する (シングルコア)
-$ make -j8 run CPUS=4   # OSをビルドしてQEMUで実行する (4コア)
+$ make -j$(nproc)              # OSをビルドする
+$ make -j$(nproc) V=1          # OSをビルドする (詳細なビルドログを出力)
+$ make -j$(nproc) RELEASE=1    # OSをビルドする (コンパイラのより高度な最適化を有効化)
+$ make -j$(nproc) run          # OSをビルドしてQEMUで実行する (シングルコア)
+$ make -j$(nproc) run CPUS=4   # OSをビルドしてQEMUで実行する (4コア)
 ```
 
 ## デバッグ
