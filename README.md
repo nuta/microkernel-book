@@ -26,11 +26,20 @@ HinaOS (ひなおーえす) はマイクロカーネルベースの教育用オ�
 
 ## 開発環境構築
 
+HinaOSの開発には次のパッケージが必要です。筆者が利用しているバージョンも記載していますが、同じバージョンでなくとも新しめのものであれば問題ありません。もしビルド時にエラーが出る場合には、バージョンが古すぎないか確認してください。
+
+- Git バージョン 2.38.0
+- Python バージョン 3.11.2
+- GNU Make バージョン 3.81
+- QEMU バージョン 7.1.0
+- LLVMツールチェーン バージョン 15.0.2
+
 Ubuntu 22.04 (Jammy) の場合は次のコマンドで必要なパッケージをインストールできます。
 
 ```
 $ sudo apt update
 $ sudo apt install llvm clang lld python3-pip qemu-system gdb-multiarch git
+$ cd <HinaOSのディレクトリ>
 $ pip3 install --user -r tools/requirements.txt
 ```
 
@@ -38,12 +47,13 @@ macOS 13 (Ventura) の場合は次のコマンドで必要なパッケージを�
 
 ```
 $ brew install llvm python3 qemu riscv-software-src/riscv/riscv-tools
+$ cd <HinaOSのディレクトリ>
 $ pip3 install --user -r tools/requirements.txt
 ```
 
 > **Note**
 >
-> Windowsでもwingetを利用して上記のパッケージをインストールすることでネイティブな開発環境を構築できます。ただし、環境構築がかえって面倒であるため、[WSL2](https://learn.microsoft.com/ja-jp/windows/wsl/install)上でUbuntuを利用するのがお勧めです。
+> Windowsでもwingetを利用して上記のパッケージをインストールすることでネイティブな開発環境を構築できます（詳細なステップは本書の付録で解説しています）。ただし環境構築がかえって面倒であるため、[WSL2](https://learn.microsoft.com/ja-jp/windows/wsl/install)上でUbuntuを利用するのがお勧めです。
 
 ## ソースコードのダウンロード
 
