@@ -1,12 +1,16 @@
 # 『自作OSで学ぶマイクロカーネルの設計と実装』サポートサイト
 
-このリポジトリは、『自作OSで学ぶマイクロカーネルの設計と実装』(秀和システム)のサポートサイト兼、教育用マイクロカーネルOS「HinaOS」のソースコードの配布場所です。
+このリポジトリは、[『自作OSで学ぶマイクロカーネルの設計と実装』(秀和システム)](https://www.hanmoto.com/bd/isbn/9784798068718) のサポートサイト兼、教育用マイクロカーネルOS「HinaOS」のソースコードの配布場所です。
 
 - [質問・バグ報告など (GitHub Discussions)](https://github.com/nuta/microkernel-book/discussions)
 - [HinaOS: ビルド・実行方法](#開発環境構築)
 - [HinaOS: 内部構造の概要](ARCHITECTURE.md)
 - [HinaOS: 実験テーマのアイデア集](IDEAS.md)
 - [HinaOS: デバッグガイド](DEBUG.md)
+
+<a href="https://www.hanmoto.com/bd/isbn/9784798068718">
+<img alt="本のカバー画像" src="https://gist.githubusercontent.com/nuta/e45864405fbdc8618af4b08de534e42c/raw/bd3df82e7039902818c8fc0d394b69250cc78fc9/cover.jpg" width="300">
+</a>
 
 ## HinaOSとは
 

@@ -123,7 +123,7 @@ HinaOSはコマンドラインシェルを実装しています。ただし、�
 
 GUIをゼロから作るといわれてもイメージがつかないと思います。そんな方は[MikanOS](https://zero.osdev.jp/)が参考になるでしょう。x86-64 CPUの勉強もできて一石二鳥です。また、[Wayland](https://wayland-book.com/)や[X Window System](https://wayland-book.com/)の仕組みを調べるのもおすすめです。
 
-### Rust/Zig/C++でのHinaOSを再実装
+### Rust/Zig/C++でHinaOSを再実装
 
 HinaOSはC言語で実装されていますが、もちろん他のプログラミング言語でもOSを実装することができます。おすすめはRust、Zig、C++です。特にRustはOS開発に便利な機能が多く面白い題材です。
 
