@@ -144,7 +144,7 @@ __noreturn void panic_after_hook(void);
 #define NYI()                                                                  \
     do {                                                                       \
         panic_before_hook();                                                   \
-        printf(SGR_ERR "[%s] %s(): not yet ymplemented: %s:%d\n SGR_RESET",    \
+        printf(SGR_ERR "[%s] %s(): not yet implemented: %s:%d\n SGR_RESET",    \
                __program_name(), __func__, __FILE__, __LINE__);                \
         panic_after_hook();                                                    \
         __builtin_unreachable();                                               \
