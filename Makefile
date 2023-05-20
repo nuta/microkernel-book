@@ -52,6 +52,8 @@ ifeq ($(OS),Windows_NT)
     CP       ?= $(PYTHON3) $(top_dir)/tools/coreutils.py cp
     MKDIR    ?= $(PYTHON3) $(top_dir)/tools/coreutils.py mkdir
     FIND     ?= $(PYTHON3) $(top_dir)/tools/coreutils.py find
+
+    export PYTHONUTF8=1
 else
     top_dir := $(shell pwd)
     RM := rm
