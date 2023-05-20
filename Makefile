@@ -54,6 +54,12 @@ ifeq ($(OS),Windows_NT)
     FIND     ?= $(PYTHON3) $(top_dir)/tools/coreutils.py find
 
     export PYTHONUTF8=1
+
+    ifeq ($(LLVM_PREFIX),)
+        # wingetでインストールされた次のLLVMツールチェーンを使う
+        # https://winget.run/pkg/LLVM/LLVM
+        LLVM_PREFIX = "C:/Program Files/llvm/bin/"
+    endif
 else
     top_dir := $(shell pwd)
     RM := rm
