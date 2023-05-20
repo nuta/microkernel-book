@@ -285,7 +285,7 @@ struct {{ msg.name }}_reply_fields {{ "{" }}
     msgid_max = next_msg_id - 1
     text = template.render(msgid_max=msgid_max, **idl)
 
-    with open(args.out, "w", encoding="utf-8") as f:
+    with open(args.out, "w") as f:
         f.write(text)
 
 
@@ -300,7 +300,7 @@ def main():
     )
     args = parser.parse_args()
 
-    idl_text = open(args.idl, encoding="utf-8").read()
+    idl_text = open(args.idl).read()
 
     try:
         idl = IDLParser().parse(idl_text)
