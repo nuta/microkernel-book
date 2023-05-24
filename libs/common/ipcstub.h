@@ -244,71 +244,69 @@ struct tcpip_closed_fields {
 };
 
 
-#define __DEFINE_MSG_TYPE(type, len) ((type) << 12 | (len))
 
-
-#define EXCEPTION_MSG __DEFINE_MSG_TYPE(1, sizeof(struct exception_fields))
-#define PAGE_FAULT_MSG __DEFINE_MSG_TYPE(2, sizeof(struct page_fault_fields))
-#define PAGE_FAULT_REPLY_MSG __DEFINE_MSG_TYPE(3, sizeof(struct page_fault_fields))
-#define NOTIFY_MSG __DEFINE_MSG_TYPE(4, sizeof(struct notify_fields))
-#define NOTIFY_IRQ_MSG __DEFINE_MSG_TYPE(5, sizeof(struct notify_irq_fields))
-#define NOTIFY_TIMER_MSG __DEFINE_MSG_TYPE(6, sizeof(struct notify_timer_fields))
-#define ASYNC_RECV_MSG __DEFINE_MSG_TYPE(7, sizeof(struct async_recv_fields))
-#define ASYNC_RECV_REPLY_MSG __DEFINE_MSG_TYPE(8, sizeof(struct async_recv_fields))
-#define PING_MSG __DEFINE_MSG_TYPE(9, sizeof(struct ping_fields))
-#define PING_REPLY_MSG __DEFINE_MSG_TYPE(10, sizeof(struct ping_fields))
-#define SPAWN_TASK_MSG __DEFINE_MSG_TYPE(11, sizeof(struct spawn_task_fields))
-#define SPAWN_TASK_REPLY_MSG __DEFINE_MSG_TYPE(12, sizeof(struct spawn_task_fields))
-#define DESTROY_TASK_MSG __DEFINE_MSG_TYPE(13, sizeof(struct destroy_task_fields))
-#define DESTROY_TASK_REPLY_MSG __DEFINE_MSG_TYPE(14, sizeof(struct destroy_task_fields))
-#define SERVICE_LOOKUP_MSG __DEFINE_MSG_TYPE(15, sizeof(struct service_lookup_fields))
-#define SERVICE_LOOKUP_REPLY_MSG __DEFINE_MSG_TYPE(16, sizeof(struct service_lookup_fields))
-#define SERVICE_REGISTER_MSG __DEFINE_MSG_TYPE(17, sizeof(struct service_register_fields))
-#define SERVICE_REGISTER_REPLY_MSG __DEFINE_MSG_TYPE(18, sizeof(struct service_register_fields))
-#define WATCH_TASKS_MSG __DEFINE_MSG_TYPE(19, sizeof(struct watch_tasks_fields))
-#define WATCH_TASKS_REPLY_MSG __DEFINE_MSG_TYPE(20, sizeof(struct watch_tasks_fields))
-#define TASK_DESTROYED_MSG __DEFINE_MSG_TYPE(21, sizeof(struct task_destroyed_fields))
-#define VM_MAP_PHYSICAL_MSG __DEFINE_MSG_TYPE(22, sizeof(struct vm_map_physical_fields))
-#define VM_MAP_PHYSICAL_REPLY_MSG __DEFINE_MSG_TYPE(23, sizeof(struct vm_map_physical_fields))
-#define VM_ALLOC_PHYSICAL_MSG __DEFINE_MSG_TYPE(24, sizeof(struct vm_alloc_physical_fields))
-#define VM_ALLOC_PHYSICAL_REPLY_MSG __DEFINE_MSG_TYPE(25, sizeof(struct vm_alloc_physical_fields))
-#define BLK_READ_MSG __DEFINE_MSG_TYPE(26, sizeof(struct blk_read_fields))
-#define BLK_READ_REPLY_MSG __DEFINE_MSG_TYPE(27, sizeof(struct blk_read_fields))
-#define BLK_WRITE_MSG __DEFINE_MSG_TYPE(28, sizeof(struct blk_write_fields))
-#define BLK_WRITE_REPLY_MSG __DEFINE_MSG_TYPE(29, sizeof(struct blk_write_fields))
-#define NET_OPEN_MSG __DEFINE_MSG_TYPE(30, sizeof(struct net_open_fields))
-#define NET_OPEN_REPLY_MSG __DEFINE_MSG_TYPE(31, sizeof(struct net_open_fields))
-#define NET_RECV_MSG __DEFINE_MSG_TYPE(32, sizeof(struct net_recv_fields))
-#define NET_SEND_MSG __DEFINE_MSG_TYPE(33, sizeof(struct net_send_fields))
-#define NET_SEND_REPLY_MSG __DEFINE_MSG_TYPE(34, sizeof(struct net_send_fields))
-#define FS_OPEN_MSG __DEFINE_MSG_TYPE(35, sizeof(struct fs_open_fields))
-#define FS_OPEN_REPLY_MSG __DEFINE_MSG_TYPE(36, sizeof(struct fs_open_fields))
-#define FS_CLOSE_MSG __DEFINE_MSG_TYPE(37, sizeof(struct fs_close_fields))
-#define FS_CLOSE_REPLY_MSG __DEFINE_MSG_TYPE(38, sizeof(struct fs_close_fields))
-#define FS_READ_MSG __DEFINE_MSG_TYPE(39, sizeof(struct fs_read_fields))
-#define FS_READ_REPLY_MSG __DEFINE_MSG_TYPE(40, sizeof(struct fs_read_fields))
-#define FS_WRITE_MSG __DEFINE_MSG_TYPE(41, sizeof(struct fs_write_fields))
-#define FS_WRITE_REPLY_MSG __DEFINE_MSG_TYPE(42, sizeof(struct fs_write_fields))
-#define FS_READDIR_MSG __DEFINE_MSG_TYPE(43, sizeof(struct fs_readdir_fields))
-#define FS_READDIR_REPLY_MSG __DEFINE_MSG_TYPE(44, sizeof(struct fs_readdir_fields))
-#define FS_MKFILE_MSG __DEFINE_MSG_TYPE(45, sizeof(struct fs_mkfile_fields))
-#define FS_MKFILE_REPLY_MSG __DEFINE_MSG_TYPE(46, sizeof(struct fs_mkfile_fields))
-#define FS_MKDIR_MSG __DEFINE_MSG_TYPE(47, sizeof(struct fs_mkdir_fields))
-#define FS_MKDIR_REPLY_MSG __DEFINE_MSG_TYPE(48, sizeof(struct fs_mkdir_fields))
-#define FS_DELETE_MSG __DEFINE_MSG_TYPE(49, sizeof(struct fs_delete_fields))
-#define FS_DELETE_REPLY_MSG __DEFINE_MSG_TYPE(50, sizeof(struct fs_delete_fields))
-#define TCPIP_CONNECT_MSG __DEFINE_MSG_TYPE(51, sizeof(struct tcpip_connect_fields))
-#define TCPIP_CONNECT_REPLY_MSG __DEFINE_MSG_TYPE(52, sizeof(struct tcpip_connect_fields))
-#define TCPIP_CLOSE_MSG __DEFINE_MSG_TYPE(53, sizeof(struct tcpip_close_fields))
-#define TCPIP_CLOSE_REPLY_MSG __DEFINE_MSG_TYPE(54, sizeof(struct tcpip_close_fields))
-#define TCPIP_WRITE_MSG __DEFINE_MSG_TYPE(55, sizeof(struct tcpip_write_fields))
-#define TCPIP_WRITE_REPLY_MSG __DEFINE_MSG_TYPE(56, sizeof(struct tcpip_write_fields))
-#define TCPIP_READ_MSG __DEFINE_MSG_TYPE(57, sizeof(struct tcpip_read_fields))
-#define TCPIP_READ_REPLY_MSG __DEFINE_MSG_TYPE(58, sizeof(struct tcpip_read_fields))
-#define TCPIP_DNS_RESOLVE_MSG __DEFINE_MSG_TYPE(59, sizeof(struct tcpip_dns_resolve_fields))
-#define TCPIP_DNS_RESOLVE_REPLY_MSG __DEFINE_MSG_TYPE(60, sizeof(struct tcpip_dns_resolve_fields))
-#define TCPIP_DATA_MSG __DEFINE_MSG_TYPE(61, sizeof(struct tcpip_data_fields))
-#define TCPIP_CLOSED_MSG __DEFINE_MSG_TYPE(62, sizeof(struct tcpip_closed_fields))
+#define EXCEPTION_MSG 1
+#define PAGE_FAULT_MSG 2
+#define PAGE_FAULT_REPLY_MSG 3
+#define NOTIFY_MSG 4
+#define NOTIFY_IRQ_MSG 5
+#define NOTIFY_TIMER_MSG 6
+#define ASYNC_RECV_MSG 7
+#define ASYNC_RECV_REPLY_MSG 8
+#define PING_MSG 9
+#define PING_REPLY_MSG 10
+#define SPAWN_TASK_MSG 11
+#define SPAWN_TASK_REPLY_MSG 12
+#define DESTROY_TASK_MSG 13
+#define DESTROY_TASK_REPLY_MSG 14
+#define SERVICE_LOOKUP_MSG 15
+#define SERVICE_LOOKUP_REPLY_MSG 16
+#define SERVICE_REGISTER_MSG 17
+#define SERVICE_REGISTER_REPLY_MSG 18
+#define WATCH_TASKS_MSG 19
+#define WATCH_TASKS_REPLY_MSG 20
+#define TASK_DESTROYED_MSG 21
+#define VM_MAP_PHYSICAL_MSG 22
+#define VM_MAP_PHYSICAL_REPLY_MSG 23
+#define VM_ALLOC_PHYSICAL_MSG 24
+#define VM_ALLOC_PHYSICAL_REPLY_MSG 25
+#define BLK_READ_MSG 26
+#define BLK_READ_REPLY_MSG 27
+#define BLK_WRITE_MSG 28
+#define BLK_WRITE_REPLY_MSG 29
+#define NET_OPEN_MSG 30
+#define NET_OPEN_REPLY_MSG 31
+#define NET_RECV_MSG 32
+#define NET_SEND_MSG 33
+#define NET_SEND_REPLY_MSG 34
+#define FS_OPEN_MSG 35
+#define FS_OPEN_REPLY_MSG 36
+#define FS_CLOSE_MSG 37
+#define FS_CLOSE_REPLY_MSG 38
+#define FS_READ_MSG 39
+#define FS_READ_REPLY_MSG 40
+#define FS_WRITE_MSG 41
+#define FS_WRITE_REPLY_MSG 42
+#define FS_READDIR_MSG 43
+#define FS_READDIR_REPLY_MSG 44
+#define FS_MKFILE_MSG 45
+#define FS_MKFILE_REPLY_MSG 46
+#define FS_MKDIR_MSG 47
+#define FS_MKDIR_REPLY_MSG 48
+#define FS_DELETE_MSG 49
+#define FS_DELETE_REPLY_MSG 50
+#define TCPIP_CONNECT_MSG 51
+#define TCPIP_CONNECT_REPLY_MSG 52
+#define TCPIP_CLOSE_MSG 53
+#define TCPIP_CLOSE_REPLY_MSG 54
+#define TCPIP_WRITE_MSG 55
+#define TCPIP_WRITE_REPLY_MSG 56
+#define TCPIP_READ_MSG 57
+#define TCPIP_READ_REPLY_MSG 58
+#define TCPIP_DNS_RESOLVE_MSG 59
+#define TCPIP_DNS_RESOLVE_REPLY_MSG 60
+#define TCPIP_DATA_MSG 61
+#define TCPIP_CLOSED_MSG 62
 
 //
 //  各種マクロの定義
