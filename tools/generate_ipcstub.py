@@ -233,12 +233,10 @@ struct {{ msg.name }}_reply_fields {{ "{" }}
 {%- endif %}
 {% endfor %}
 
-#define __DEFINE_MSG_TYPE(type, len) ((type) << 12 | (len))
-
 {% for msg in messages %}
-#define {{ msg.name | upper }}_MSG __DEFINE_MSG_TYPE({{ msg.id }}, sizeof(struct {{ msg.name }}_fields))
+#define {{ msg.name | upper }}_MSG {{ msg.id }}
 {%- if not msg.oneway %}
-#define {{ msg.name | upper }}_REPLY_MSG __DEFINE_MSG_TYPE({{ msg.reply_id }}, sizeof(struct {{ msg.name }}_fields))
+#define {{ msg.name | upper }}_REPLY_MSG {{ msg.reply_id }}
 {%- endif %}
 {%- endfor %}
 
