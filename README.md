@@ -28,8 +28,6 @@ HinaOSに手を加えながら本書を読み進めていくことで、OSの仕
 
 > [!NOTE]
 > 「ゼロからの実装の雰囲気を手っ取り早く動画で感じてみたい」という方は [筆者の45分OS自作ライブコーディング (オープンソースカンファレンス)](https://www.youtube.com/watch?v=dPEsTeL2F98) がおすすめです。
->
-> [![筆者の45分OS自作ライブコーディング](http://img.youtube.com/vi/dPEsTeL2F98/0.jpg)](https://www.youtube.com/watch?v=dPEsTeL2F98)
 
 ----
 
