@@ -93,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Chocolatey packages
-        run: choco install qemu --version=2023.8.2
+        run: choco install qemu --version=2023.5.31
       - name: Install pip packages
         run: py -m pip install --user -r tools/requirements.txt
       - name: make doctor
