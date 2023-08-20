@@ -5,3 +5,4 @@
 *.img
 *.pcap
 *.pyc
+*.sqlite3

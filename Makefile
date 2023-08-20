@@ -142,6 +142,11 @@ else
 CFLAGS += -O3 -DRELEASE_BUILD
 endif
 
+ifneq ($(LTO),)
+LDFLAGS += --lto-O1 --thinlto-jobs=all --thinlto-cache-policy=cache_size_bytes=2g --thinlto-cache-dir=$(BUILD_DIR)/thinlto -plugin-opt=-import-instr-limit=10
+CFLAGS += -flto=thin
+endif
+
 # エミュレータ (QEMU) の起動コマンド
 QEMU ?= $(QEMU_PREFIX)qemu-system-riscv32
 QEMUFLAGS += --no-reboot -m 128 -machine virt,aclint=on -bios none
