@@ -35,6 +35,8 @@ SECTIONS {
         . = ALIGN(16);
         *(.sbss .sbss.*);
 
+        . = ALIGN(16);
+
         // ヒープ領域 (mallocが管理)
         __heap = .;
         . += 4 * 1024 * 1024;  // 4MiB
