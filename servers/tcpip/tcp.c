@@ -61,7 +61,8 @@ static struct tcp_pcb *tcp_lookup(endpoint_t *local_ep, endpoint_t *remote_ep) {
         return pcb;
     }
 
-    return NULL;
+    // Look for the listening socket
+    return tcp_lookup_local(local_ep);
 }
 
 // 新しいPCBを作成する。
@@ -97,6 +98,26 @@ struct tcp_pcb *tcp_new(void *arg) {
     pcb->arg = arg;
     list_elem_init(&pcb->next);
     return pcb;
+}
+
+// bind specified ip address & port to pcb
+error_t tcp_bind(struct tcp_pcb *pcb, ipv4addr_t addr, port_t port) {
+    endpoint_t ep = {.addr = addr, .port = port};
+
+    // return err if port is already in use
+    if(tcp_lookup_local(&ep) != NULL) {
+        WARN("port %d in use", port);
+        return ERR_ALREADY_USED;
+    }
+
+    pcb->local = ep;
+    
+    return OK;
+}
+
+void tcp_listen(struct tcp_pcb *pcb) {
+    pcb->state = TCP_STATE_LISTEN;
+    list_push_back(&active_pcbs, &pcb->next);
 }
 
 // TCPコネクションを開く (アクティブオープン)。
@@ -263,6 +284,20 @@ static void tcp_process(struct tcp_pcb *pcb, ipv4addr_t src_addr,
           (flags & TCP_ACK) ? "ACK " : "", (flags & TCP_RST) ? "RST " : "",
           (flags & TCP_PSH) ? "PSH " : "");
 
+    if (pcb->state == TCP_STATE_LISTEN) {
+        if((flags & TCP_SYN) == 0) {
+            // discard packet
+            return;
+        }
+
+        // todo: fix this
+        pcb->state = TCP_STATE_SYN_RECVED;
+        pcb->remote.addr = src_addr;
+        pcb->remote.port = src_port;
+        pcb->last_ack = seq + 1;
+        pcb->pending_flags |= (TCP_PEND_SYN|TCP_PEND_SYN);
+    }
+
     // RSTパケットの処理
     if (flags & TCP_RST) {
         WARN("tcp: received RST from %pI4:%d", src_addr, src_port);
@@ -285,6 +320,19 @@ static void tcp_process(struct tcp_pcb *pcb, ipv4addr_t src_addr,
 
     // コネクションの状態に応じた処理を行う。
     switch (pcb->state) {
+        case TCP_STATE_SYN_RECVED: {
+            if((flags & TCP_ACK) == 0) {
+                WARN("tcp: expected ACK but received %02x", flags);
+                break;
+            }
+
+            pcb->next_seqno = ack;
+            pcb->last_ack = seq;
+            pcb->state = TCP_STATE_ESTABLISHED;
+            pcb->retransmit_at = 0;
+            break;
+        }
+
         // SYNを送信して、SYN+ACKを待っている状態。
         case TCP_STATE_SYN_SENT: {
             // SYN+ACKを受信したかチェック。

@@ -215,6 +215,37 @@ void main(void) {
                 dns_query(hostname, (void *) m.src);
                 break;
             }
+            case TCPIP_LISTEN_MSG: {
+                // create new socket
+                struct socket *sock = alloc_socket();
+                struct tcp_pcb *pcb = tcp_new(sock);
+
+                // try to bind pcb to specified port
+                error_t err = tcp_bind(
+                    pcb, IPV4_ADDR_UNSPECIFIED, m.tcpip_listen.listen_port
+                );
+
+                if(err != OK) {
+                    // delete socket
+                    sock->used = false;
+                    // reply error message
+                    ipc_reply_err(m.src, err);
+                    break;
+                }
+
+                // listen
+                tcp_listen(pcb);
+
+                // init socket
+                sock->task = m.src;
+                sock->tcp_pcb = pcb;
+
+                // reply
+                m.type = TCPIP_LISTEN_REPLY_MSG;
+                m.tcpip_listen_reply.sock = sock->fd;
+                ipc_send_noblock(m.src, &m);
+                break;
+            }
             case TCPIP_CONNECT_MSG: {
                 struct socket *sock = alloc_socket();
                 struct tcp_pcb *pcb = tcp_new(sock);

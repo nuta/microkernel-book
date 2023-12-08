@@ -17,6 +17,8 @@
 // 簡単のため、このTCP実装は素朴なHTTPクライアントが動く程度の状態しか実装していない。
 // パッシブオープンやアクティブクローズなどを実装する場合には、より多くの状態が登場する。
 enum tcp_state {
+    TCP_STATE_LISTEN,
+    TCP_STATE_SYN_RECVED,   // received syn, waiting for syn + ack
     TCP_STATE_SYN_SENT,     // SYNを送信し、SYN+ACKを待っている状態
     TCP_STATE_ESTABLISHED,  // コネクションを確立した状態
     TCP_STATE_CLOSED,       // コネクションが閉じられた状態
@@ -72,6 +74,8 @@ struct tcp_header {
 } __packed;
 
 struct tcp_pcb *tcp_new(void *arg);
+error_t tcp_bind(struct tcp_pcb *pcb, ipv4addr_t addr, port_t port);
+void tcp_listen(struct tcp_pcb *pcb);
 error_t tcp_connect(struct tcp_pcb *sock, ipv4addr_t dst_addr, port_t dst_port);
 void tcp_close(struct tcp_pcb *sock);
 void tcp_write(struct tcp_pcb *sock, const void *data, size_t len);

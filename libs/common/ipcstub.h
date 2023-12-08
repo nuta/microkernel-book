@@ -206,6 +206,13 @@ struct tcpip_connect_reply_fields {
     int sock;
 };
 
+struct tcpip_listen_fields {
+    uint16_t listen_port;
+};
+struct tcpip_listen_reply_fields {
+    int sock;
+};
+
 struct tcpip_close_fields {
     int sock;
 };
@@ -297,16 +304,18 @@ struct tcpip_closed_fields {
 #define FS_DELETE_REPLY_MSG 50
 #define TCPIP_CONNECT_MSG 51
 #define TCPIP_CONNECT_REPLY_MSG 52
-#define TCPIP_CLOSE_MSG 53
-#define TCPIP_CLOSE_REPLY_MSG 54
-#define TCPIP_WRITE_MSG 55
-#define TCPIP_WRITE_REPLY_MSG 56
-#define TCPIP_READ_MSG 57
-#define TCPIP_READ_REPLY_MSG 58
-#define TCPIP_DNS_RESOLVE_MSG 59
-#define TCPIP_DNS_RESOLVE_REPLY_MSG 60
-#define TCPIP_DATA_MSG 61
-#define TCPIP_CLOSED_MSG 62
+#define TCPIP_LISTEN_MSG 53
+#define TCPIP_LISTEN_REPLY_MSG 54
+#define TCPIP_CLOSE_MSG 55
+#define TCPIP_CLOSE_REPLY_MSG 56
+#define TCPIP_WRITE_MSG 57
+#define TCPIP_WRITE_REPLY_MSG 58
+#define TCPIP_READ_MSG 59
+#define TCPIP_READ_REPLY_MSG 60
+#define TCPIP_DNS_RESOLVE_MSG 61
+#define TCPIP_DNS_RESOLVE_REPLY_MSG 62
+#define TCPIP_DATA_MSG 63
+#define TCPIP_CLOSED_MSG 64
 
 //
 //  各種マクロの定義
@@ -364,6 +373,8 @@ struct tcpip_closed_fields {
     struct fs_delete_reply_fields fs_delete_reply; \
     struct tcpip_connect_fields tcpip_connect; \
     struct tcpip_connect_reply_fields tcpip_connect_reply; \
+    struct tcpip_listen_fields tcpip_listen; \
+    struct tcpip_listen_reply_fields tcpip_listen_reply; \
     struct tcpip_close_fields tcpip_close; \
     struct tcpip_close_reply_fields tcpip_close_reply; \
     struct tcpip_write_fields tcpip_write; \
@@ -375,7 +386,7 @@ struct tcpip_closed_fields {
     struct tcpip_data_fields tcpip_data; \
     struct tcpip_closed_fields tcpip_closed; \
 
-#define IPCSTUB_MSGID_MAX 62
+#define IPCSTUB_MSGID_MAX 64
 #define IPCSTUB_MSGID2STR \
     (const char *[]){ \
      \
@@ -460,21 +471,24 @@ struct tcpip_closed_fields {
         [51] = "tcpip_connect", \
         [52] = "tcpip_connect_reply", \
      \
-        [53] = "tcpip_close", \
-        [54] = "tcpip_close_reply", \
+        [53] = "tcpip_listen", \
+        [54] = "tcpip_listen_reply", \
      \
-        [55] = "tcpip_write", \
-        [56] = "tcpip_write_reply", \
+        [55] = "tcpip_close", \
+        [56] = "tcpip_close_reply", \
      \
-        [57] = "tcpip_read", \
-        [58] = "tcpip_read_reply", \
+        [57] = "tcpip_write", \
+        [58] = "tcpip_write_reply", \
      \
-        [59] = "tcpip_dns_resolve", \
-        [60] = "tcpip_dns_resolve_reply", \
+        [59] = "tcpip_read", \
+        [60] = "tcpip_read_reply", \
      \
-        [61] = "tcpip_data", \
+        [61] = "tcpip_dns_resolve", \
+        [62] = "tcpip_dns_resolve_reply", \
      \
-        [62] = "tcpip_closed", \
+        [63] = "tcpip_data", \
+     \
+        [64] = "tcpip_closed", \
      \
     }
 
@@ -686,6 +700,14 @@ struct tcpip_closed_fields {
     _Static_assert( \
         sizeof(struct tcpip_connect_reply_fields) < 4096, \
         "'tcpip_connect_reply' message is too large, should be less than 4096 bytes" \
+    ); \
+    _Static_assert( \
+        sizeof(struct tcpip_listen_fields) < 4096, \
+        "'tcpip_listen' message is too large, should be less than 4096 bytes" \
+    ); \
+    _Static_assert( \
+        sizeof(struct tcpip_listen_reply_fields) < 4096, \
+        "'tcpip_listen_reply' message is too large, should be less than 4096 bytes" \
     ); \
     _Static_assert( \
         sizeof(struct tcpip_close_fields) < 4096, \

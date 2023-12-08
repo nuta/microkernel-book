@@ -150,7 +150,7 @@ QEMUFLAGS += -drive file=$(hinafs_img),if=none,format=raw,id=drive0
 QEMUFLAGS += -device virtio-blk-device,drive=drive0,bus=virtio-mmio-bus.0
 QEMUFLAGS += -device virtio-net-device,netdev=net0,bus=virtio-mmio-bus.1
 QEMUFLAGS += -object filter-dump,id=fiter0,netdev=net0,file=virtio-net.pcap
-QEMUFLAGS += -netdev user,id=net0
+QEMUFLAGS += -netdev user,id=net0,hostfwd=tcp:127.0.0.1:1234-:80
 
 hinaos_elf     := $(BUILD_DIR)/hinaos.elf
 boot_elf       := $(BUILD_DIR)/servers/vm.elf
