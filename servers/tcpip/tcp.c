@@ -96,6 +96,7 @@ struct tcp_pcb *tcp_new(void *arg) {
     pcb->retransmit_at = 0;
     pcb->num_retransmits = 0;
     pcb->arg = arg;
+    pcb->parent = NULL;
     list_elem_init(&pcb->next);
     return pcb;
 }
@@ -290,12 +291,18 @@ static void tcp_process(struct tcp_pcb *pcb, ipv4addr_t src_addr,
             return;
         }
 
-        // todo: fix this
-        pcb->state = TCP_STATE_SYN_RECVED;
-        pcb->remote.addr = src_addr;
-        pcb->remote.port = src_port;
-        pcb->last_ack = seq + 1;
-        pcb->pending_flags |= (TCP_PEND_SYN|TCP_PEND_ACK);
+        // create new pcb
+        TRACE("tcp: new connection from port %d", src_port);
+
+        struct tcp_pcb *new_pcb = tcp_new(NULL);
+        new_pcb->state = TCP_STATE_SYN_RECVED;
+        new_pcb->local = pcb->local;
+        new_pcb->remote.addr = src_addr;
+        new_pcb->remote.port = src_port;
+        new_pcb->last_ack = seq + 1;
+        new_pcb->pending_flags |= (TCP_PEND_SYN|TCP_PEND_ACK);
+        new_pcb->parent = pcb;
+        list_push_back(&active_pcbs, &new_pcb->next);
         return;
     }
 

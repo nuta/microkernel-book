@@ -35,7 +35,7 @@ void main(void) {
                 m.type = TCPIP_DESTROY_MSG;
                 m.tcpip_destroy.sock = m.tcpip_closed.sock;
                 ipc_call(tcpip_server, &m);
-                return;
+                break;
             }
             case TCPIP_DATA_MSG: {
                 int sock = m.tcpip_data.sock;
