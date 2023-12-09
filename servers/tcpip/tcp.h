@@ -21,6 +21,7 @@ enum tcp_state {
     TCP_STATE_SYN_RECVED,   // received syn, waiting for syn + ack
     TCP_STATE_SYN_SENT,     // SYNを送信し、SYN+ACKを待っている状態
     TCP_STATE_ESTABLISHED,  // コネクションを確立した状態
+    TCP_STATE_LAST_ACK,
     TCP_STATE_CLOSED,       // コネクションが閉じられた状態
 };
 

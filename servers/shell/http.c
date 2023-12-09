@@ -148,8 +148,8 @@ void http_get(const char *url) {
                 received(sock, m.tcpip_read_reply.data,
                          m.tcpip_read_reply.data_len);
 
-                m.type = TCPIP_CLOSE_MSG;
-                m.tcpip_close.sock = m.tcpip_close.sock;
+                m.type = TCPIP_DESTROY_MSG;
+                m.tcpip_destroy.sock = m.tcpip_closed.sock;
                 ipc_call(tcpip_server, &m);
                 return;
             }

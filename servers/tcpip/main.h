@@ -19,5 +19,5 @@ struct socket {
 void callback_ethernet_transmit(mbuf_t pkt);
 void callback_tcp_data(struct tcp_pcb *sock);
 void callback_tcp_rst(struct tcp_pcb *sock);
-void callback_tcp_fin(struct tcp_pcb *sock);
+void callback_tcp_closed(struct tcp_pcb *sock);
 void callback_dns_got_answer(ipv4addr_t addr, void *arg);

@@ -121,8 +121,8 @@ rpc fs_delete(path: cstr[256]) -> ();
 rpc tcpip_connect(dst_addr: uint32, dst_port: uint16) -> (sock: int);
 // create socket and listen on specified port
 rpc tcpip_listen(listen_port: uint16) -> (sock: int);
-// ソケットのクローズ
-rpc tcpip_close(sock: int) -> ();
+// destroy socket
+rpc tcpip_destroy(sock: int) -> ();
 // TCP: データの送信
 rpc tcpip_write(sock: int, data: bytes[1024]) -> ();
 // TCP: 受信済みデータの取得

@@ -17,18 +17,6 @@ static task_t tcpip_server;
     "</body>"                                                                   \
     "</html>\n"
 
-static void process(int sock, uint8_t *data, size_t len) {
-    // todo: fix this
-    static char buf[] = "HTTP/1.1 200 OK\r\nConnection: close\rContent-Length: 109\r\n\r\n" INDEX_HTML;
-
-    struct message m;
-    m.type = TCPIP_WRITE_MSG;
-    m.tcpip_write.sock = sock;
-    memcpy(m.tcpip_write.data, buf, sizeof(buf));
-    m.tcpip_write.data_len = strlen(buf);
-    ASSERT_OK(ipc_call(tcpip_server, &m));
-}
-
 void main(void) {
     // find tcpip server
     tcpip_server = ipc_lookup("tcpip");
@@ -43,19 +31,28 @@ void main(void) {
         ASSERT_OK(ipc_recv(IPC_ANY, &m));
         switch (m.type) {
             case TCPIP_CLOSED_MSG: {
-                // close socket
-                m.type = TCPIP_CLOSE_MSG;
-                m.tcpip_close.sock = m.tcpip_close.sock;
+                // destroy socket
+                m.type = TCPIP_DESTROY_MSG;
+                m.tcpip_destroy.sock = m.tcpip_closed.sock;
                 ipc_call(tcpip_server, &m);
                 return;
             }
-
             case TCPIP_DATA_MSG: {
                 int sock = m.tcpip_data.sock;
+
+                // read request
                 m.type = TCPIP_READ_MSG;
                 m.tcpip_read.sock = sock;
                 ASSERT_OK(ipc_call(tcpip_server, &m));
-                process(sock, m.tcpip_read_reply.data, m.tcpip_read_reply.data_len);
+
+                // response(todo: fix this)
+                static char buf[] = "HTTP/1.0 200 OK\r\nConnection: close\rContent-Length: 109\r\n\r\n" INDEX_HTML;
+                
+                m.type = TCPIP_WRITE_MSG;
+                m.tcpip_write.sock = sock;
+                memcpy(m.tcpip_write.data, buf, sizeof(buf));
+                m.tcpip_write.data_len = strlen(buf);
+                ASSERT_OK(ipc_call(tcpip_server, &m));
                 break;
             }
 

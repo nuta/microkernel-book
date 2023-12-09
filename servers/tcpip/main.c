@@ -99,7 +99,7 @@ void callback_tcp_data(struct tcp_pcb *pcb) {
 }
 
 // TCPコネクションが閉じられたとき (パッシブクローズ) に呼ばれる。
-void callback_tcp_fin(struct tcp_pcb *pcb) {
+void callback_tcp_closed(struct tcp_pcb *pcb) {
     struct socket *sock = get_socket_from_pcb(pcb);
 
     struct message m;
@@ -294,8 +294,8 @@ void main(void) {
                 ipc_reply(m.src, &m);
                 break;
             }
-            case TCPIP_CLOSE_MSG: {
-                struct socket *sock = lookup_socket(m.src, m.tcpip_close.sock);
+            case TCPIP_DESTROY_MSG: {
+                struct socket *sock = lookup_socket(m.src, m.tcpip_destroy.sock);
                 if (!sock) {
                     ipc_reply_err(m.src, ERR_INVALID_ARG);
                     break;
@@ -303,7 +303,7 @@ void main(void) {
 
                 free_socket(sock);
 
-                m.type = TCPIP_CLOSE_REPLY_MSG;
+                m.type = TCPIP_DESTROY_REPLY_MSG;
                 ipc_reply(m.src, &m);
                 break;
             }

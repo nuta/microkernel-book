@@ -213,10 +213,10 @@ struct tcpip_listen_reply_fields {
     int sock;
 };
 
-struct tcpip_close_fields {
+struct tcpip_destroy_fields {
     int sock;
 };
-struct tcpip_close_reply_fields {
+struct tcpip_destroy_reply_fields {
 };
 
 struct tcpip_write_fields {
@@ -306,8 +306,8 @@ struct tcpip_closed_fields {
 #define TCPIP_CONNECT_REPLY_MSG 52
 #define TCPIP_LISTEN_MSG 53
 #define TCPIP_LISTEN_REPLY_MSG 54
-#define TCPIP_CLOSE_MSG 55
-#define TCPIP_CLOSE_REPLY_MSG 56
+#define TCPIP_DESTROY_MSG 55
+#define TCPIP_DESTROY_REPLY_MSG 56
 #define TCPIP_WRITE_MSG 57
 #define TCPIP_WRITE_REPLY_MSG 58
 #define TCPIP_READ_MSG 59
@@ -375,8 +375,8 @@ struct tcpip_closed_fields {
     struct tcpip_connect_reply_fields tcpip_connect_reply; \
     struct tcpip_listen_fields tcpip_listen; \
     struct tcpip_listen_reply_fields tcpip_listen_reply; \
-    struct tcpip_close_fields tcpip_close; \
-    struct tcpip_close_reply_fields tcpip_close_reply; \
+    struct tcpip_destroy_fields tcpip_destroy; \
+    struct tcpip_destroy_reply_fields tcpip_destroy_reply; \
     struct tcpip_write_fields tcpip_write; \
     struct tcpip_write_reply_fields tcpip_write_reply; \
     struct tcpip_read_fields tcpip_read; \
@@ -474,8 +474,8 @@ struct tcpip_closed_fields {
         [53] = "tcpip_listen", \
         [54] = "tcpip_listen_reply", \
      \
-        [55] = "tcpip_close", \
-        [56] = "tcpip_close_reply", \
+        [55] = "tcpip_destroy", \
+        [56] = "tcpip_destroy_reply", \
      \
         [57] = "tcpip_write", \
         [58] = "tcpip_write_reply", \
@@ -710,12 +710,12 @@ struct tcpip_closed_fields {
         "'tcpip_listen_reply' message is too large, should be less than 4096 bytes" \
     ); \
     _Static_assert( \
-        sizeof(struct tcpip_close_fields) < 4096, \
-        "'tcpip_close' message is too large, should be less than 4096 bytes" \
+        sizeof(struct tcpip_destroy_fields) < 4096, \
+        "'tcpip_destroy' message is too large, should be less than 4096 bytes" \
     ); \
     _Static_assert( \
-        sizeof(struct tcpip_close_reply_fields) < 4096, \
-        "'tcpip_close_reply' message is too large, should be less than 4096 bytes" \
+        sizeof(struct tcpip_destroy_reply_fields) < 4096, \
+        "'tcpip_destroy_reply' message is too large, should be less than 4096 bytes" \
     ); \
     _Static_assert( \
         sizeof(struct tcpip_write_fields) < 4096, \
