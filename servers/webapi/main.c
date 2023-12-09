@@ -34,7 +34,7 @@ void main(void) {
                 // destroy socket
                 m.type = TCPIP_DESTROY_MSG;
                 m.tcpip_destroy.sock = m.tcpip_closed.sock;
-                ipc_call(tcpip_server, &m);
+                ASSERT_OK(ipc_call(tcpip_server, &m));
                 break;
             }
             case TCPIP_DATA_MSG: {
@@ -46,7 +46,7 @@ void main(void) {
                 ASSERT_OK(ipc_call(tcpip_server, &m));
 
                 // response(todo: fix this)
-                static char buf[] = "HTTP/1.0 200 OK\r\nConnection: close\rContent-Length: 109\r\n\r\n" INDEX_HTML;
+                static char buf[] = "HTTP/1.1 200 OK\r\nConnection: close\rContent-Length: 109\r\n\r\n" INDEX_HTML;
                 
                 m.type = TCPIP_WRITE_MSG;
                 m.tcpip_write.sock = sock;

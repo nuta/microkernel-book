@@ -47,7 +47,7 @@ static struct socket *lookup_socket(task_t task, int sock) {
 // ソケットを解放する。
 static void free_socket(struct socket *sock) {
     sock->used = false;
-    tcp_close(sock->tcp_pcb);
+    tcp_destroy(sock->tcp_pcb);
 }
 
 // 任意のタスクが終了したときに呼ばれる。

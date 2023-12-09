@@ -145,8 +145,7 @@ error_t tcp_connect(struct tcp_pcb *pcb, ipv4addr_t dst_addr, port_t dst_port) {
     return ERR_TRY_AGAIN;
 }
 
-// TCPコネクションを削除する。FINパケットを送信するような行儀の良い切断処理はしない。
-void tcp_close(struct tcp_pcb *pcb) {
+void tcp_destroy(struct tcp_pcb *pcb) {
     mbuf_delete(pcb->rx_buf);
     mbuf_delete(pcb->tx_buf);
     list_remove(&pcb->next);

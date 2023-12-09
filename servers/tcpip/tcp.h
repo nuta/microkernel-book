@@ -79,7 +79,7 @@ struct tcp_pcb *tcp_new(void *arg);
 error_t tcp_bind(struct tcp_pcb *pcb, ipv4addr_t addr, port_t port);
 void tcp_listen(struct tcp_pcb *pcb);
 error_t tcp_connect(struct tcp_pcb *sock, ipv4addr_t dst_addr, port_t dst_port);
-void tcp_close(struct tcp_pcb *sock);
+void tcp_destroy(struct tcp_pcb *sock);
 void tcp_write(struct tcp_pcb *sock, const void *data, size_t len);
 size_t tcp_read(struct tcp_pcb *sock, void *buf, size_t buf_len);
 void tcp_receive(ipv4addr_t dst, ipv4addr_t src, mbuf_t pkt);
