@@ -295,7 +295,8 @@ static void tcp_process(struct tcp_pcb *pcb, ipv4addr_t src_addr,
         pcb->remote.addr = src_addr;
         pcb->remote.port = src_port;
         pcb->last_ack = seq + 1;
-        pcb->pending_flags |= (TCP_PEND_SYN|TCP_PEND_SYN);
+        pcb->pending_flags |= (TCP_PEND_SYN|TCP_PEND_ACK);
+        return;
     }
 
     // RSTパケットの処理
