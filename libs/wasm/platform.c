@@ -1,6 +1,8 @@
 #include "platform_api_vmcore.h"
 #include "platform_api_extension.h"
 
+#include <libs/common/print.h>
+
 // functions declared in platform_api_vmcore.h
 int bh_platform_init(void) {
     return 0;
