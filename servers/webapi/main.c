@@ -1,8 +1,6 @@
 #include <libs/common/print.h>
 #include <libs/common/string.h>
-#include <libs/common/vprintf.h>
 #include <libs/user/ipc.h>
-#include <libs/user/malloc.h>
 
 static task_t tcpip_server;
 

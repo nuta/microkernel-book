@@ -57,13 +57,6 @@ int main(void) {
         goto fail;
     }
 
-    wasm_exec_env_t exec_env = NULL;
-    exec_env = wasm_runtime_create_exec_env(moduleinst, STACK_SIZE);
-    if(!exec_env) {
-        ERROR("Create wasm execution environment failed");
-        goto fail;
-    }
-
     // find function
     wasm_function_inst_t func = NULL;
     func = wasm_runtime_lookup_function(moduleinst, "fib", NULL);
@@ -72,18 +65,22 @@ int main(void) {
         goto fail;
     }
 
-    // invoke
-    wasm_val_t results[1] = {{.kind = WASM_I32, .of.i32 = 0}};
-    wasm_val_t argments[1] = {
-        {.kind = WASM_I32, .of.i32 = 24}
-    };
+    // create exec environment
+    wasm_exec_env_t exec_env = NULL;
+    exec_env = wasm_runtime_create_exec_env(moduleinst, STACK_SIZE);
+    if(!exec_env) {
+        ERROR("Create wasm execution environment failed");
+        goto fail;
+    }
 
-    if(!wasm_runtime_call_wasm_a(exec_env, func, 1, results, 1, argments)) {
+    // invoke
+    uint32_t args[1] = {24};
+    if(!wasm_runtime_call_wasm(exec_env, func, 1, args)) {
         ERROR("call wasm function fib failed");
         goto fail;
     }
 
-    INFO("ret = %d", results[0].of.i32);
+    INFO("ret = %d", args[0]);
 
     // cleanup
     fail:

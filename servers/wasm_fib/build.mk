@@ -1,9 +1,9 @@
-WAMR_IWASM_ROOT     := $(top_dir)/libs/third_party/wasm-micro-runtime/core/iwasm
+WAMR_IWASM_ROOT := $(top_dir)/libs/third_party/wasm-micro-runtime/core/iwasm
 
-libs-y      += wasm
-objs-y      += main.o libgcc.a
-cflags-y    +=  -I$(WAMR_IWASM_ROOT)/include \
-                -I$(top_dir)/$(dir)/include
+libs-y          += wasm
+objs-y          += main.o libgcc.a
+cflags-y        +=  -I$(WAMR_IWASM_ROOT)/include    \
+                    -I$(top_dir)/$(dir)/include
 
 # WAMR builds require libgcc.a, so use the one from riscv-gnu-toolchain
 # To build from source, execute the following commands
