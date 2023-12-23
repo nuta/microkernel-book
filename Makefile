@@ -106,7 +106,9 @@ FIND      ?= find
 ECHO      ?= echo
 
 # ビルド対象のサーバとライブラリの名前リスト (例: "fs tcpip shell ...")
-all_servers := $(notdir $(patsubst %/build.mk, %, $(wildcard servers/*/build.mk)))
+all_servers  := $(notdir $(patsubst %/build.mk, %, $(wildcard servers/*/build.mk)))
+core_servers := $(filter-out hello_wasmvm, $(all_servers))
+wasm_servers := hello_wasmvm
 all_libs := $(notdir $(patsubst %/build.mk, %, $(wildcard libs/*/build.mk)))
 
 # リンカーとCコンパイラのオプション
@@ -219,20 +221,20 @@ include kernel/build.mk
 include mk/executable.mk
 
 # ライブラリの生成ルール (build/libs/<ライブラリ名>.o)
-$(foreach lib, $(all_libs),                                       \
-	$(eval dir := libs/$(lib))                                \
-	$(eval build_dir := $(BUILD_DIR)/$(dir))                  \
-	$(eval output := $(BUILD_DIR)/libs/$(lib).o)              \
-	$(eval objs-y :=)                                         \
-	$(eval cflags-y :=)                                       \
-	$(eval ldflags-y :=)                                      \
-	$(eval subdirs-y :=)                                      \
-	$(eval include $(dir)/build.mk)                           \
-	$(eval include $(top_dir)/mk/lib.mk)                      \
+$(foreach lib, $(all_libs),                                         \
+	$(eval dir := libs/$(lib))                                      \
+	$(eval build_dir := $(BUILD_DIR)/$(dir))                        \
+	$(eval output := $(BUILD_DIR)/libs/$(lib).o)                    \
+	$(eval objs-y :=)                                               \
+	$(eval cflags-y :=)                                             \
+	$(eval ldflags-y :=)                                            \
+	$(eval subdirs-y :=)                                            \
+	$(eval include $(dir)/build.mk)                                 \
+	$(eval include $(top_dir)/mk/lib.mk)                            \
 )
 
-# サーバの実行ファイルの生成ルール (build/servers/<サーバ名>.elf)
-$(foreach server, $(all_servers),                                       \
+# Build rule for core servers (build/servers/*.elf)
+$(foreach server, $(core_servers),                                	\
 	$(eval dir := servers/$(server))                                \
 	$(eval build_dir := $(BUILD_DIR)/$(dir))                        \
 	$(eval executable := $(BUILD_DIR)/servers/$(server).elf)        \
@@ -245,6 +247,18 @@ $(foreach server, $(all_servers),                                       \
 	$(eval extra-deps-y := $(BUILD_DIR)/servers/$(server)/user.ld)  \
 	$(eval include $(dir)/build.mk)                                 \
 	$(eval include $(top_dir)/mk/executable.mk)                     \
+)
+
+# Build rule for wasm servers (build/servers/*.wasm)
+$(foreach server, $(wasm_servers),                                 	\
+	$(eval dir := servers/$(server))                                \
+	$(eval build_dir := $(BUILD_DIR)/$(dir))                        \
+	$(eval executable := $(BUILD_DIR)/servers/$(server).wasm)      	\
+	$(eval name := $(server))                                       \
+	$(eval srcs-y :=)                                               \
+	$(eval cflags-y := -I$(top_dir))                             	\
+	$(eval include $(dir)/build.mk)                                 \
+	$(eval include $(top_dir)/mk/wasm.mk)                     		\
 )
 
 # Cファイルのコンパイル規則
@@ -272,14 +286,19 @@ $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.S Makefile
 	$(CC) $(CFLAGS) -c -o $@ $< -MD -MF $(@:.o=.deps) -MJ $(@:.o=.json)
 
 # bootfsイメージ
-server_elf_files := $(foreach server, $(filter-out vm, $(all_servers)), $(BUILD_DIR)/bootfs/$(server).elf)
-$(bootfs_bin): $(server_elf_files) tools/mkbootfs.py
+server_elf_files  := $(foreach server, $(filter-out vm, $(core_servers)), $(BUILD_DIR)/bootfs/$(server).elf)
+server_wasm_files := $(foreach server, $(wasm_servers), $(BUILD_DIR)/bootfs/$(server).wasm)
+$(bootfs_bin): $(server_elf_files) $(server_wasm_files) tools/mkbootfs.py
 	$(PROGRESS) MKBOOTFS $@
 	$(MKDIR) -p $(@D)
 	$(PYTHON3) ./tools/mkbootfs.py -o $@ $(BUILD_DIR)/bootfs
 
 # bootfsの中身を生成するためのルール
 $(BUILD_DIR)/bootfs/%.elf: $(BUILD_DIR)/servers/%.elf
+	$(MKDIR) -p $(@D)
+	$(CP) $< $@
+
+$(BUILD_DIR)/bootfs/%.wasm: $(BUILD_DIR)/servers/%.wasm
 	$(MKDIR) -p $(@D)
 	$(CP) $< $@
 
@@ -305,7 +324,7 @@ $(BUILD_DIR)/kernel/kernel.ld: kernel/$(ARCH)/kernel.ld.template
 $(BUILD_DIR)/user_ld_params.h: tools/generate_user_ld_params.py $(BUILD_DIR)/consts.mk
 	$(PROGRESS) GEN $@
 	$(MKDIR) -p $(@D)
-	$(PYTHON3) ./tools/generate_user_ld_params.py -o $@ $(all_servers)
+	$(PYTHON3) ./tools/generate_user_ld_params.py -o $@ $(core_servers)
 
 # ユーザープログラムのリンカスクリプト
 $(BUILD_DIR)/servers/%/user.ld: libs/user/$(ARCH)/user.ld.template $(BUILD_DIR)/user_ld_params.h
@@ -317,7 +336,7 @@ $(BUILD_DIR)/servers/%/user.ld: libs/user/$(ARCH)/user.ld.template $(BUILD_DIR)/
 
 # makeのコマンドライン引数や環境変数から指定できるビルド設定が変更された場合に、すべてのファイル
 # を再コンパイルするためのギミック。
-build_vars := ARCH BUILD_DIR BOOT_SERVERS AUTORUN RELEASE all_servers
+build_vars := ARCH BUILD_DIR BOOT_SERVERS AUTORUN RELEASE core_servers wasm_servers
 $(BUILD_DIR)/consts.mk: FORCE
 	$(PROGRESS) UPDATE $@
 	$(MKDIR) -p $(@D)
