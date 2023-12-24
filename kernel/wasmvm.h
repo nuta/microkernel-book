@@ -13,7 +13,7 @@ struct wasmvm {
 };
 
 // host functions exported to WASM (defined in wasmvm.c)
-static void ipc_reply(task_t dst, struct message *m);
-static error_t ipc_recv(task_t src, struct message *m);
+void ipc_reply(task_t dst, struct message *m);
+error_t ipc_recv(task_t src, struct message *m);
 
 __noreturn void wasmvm_run(struct wasmvm *wasmvm);

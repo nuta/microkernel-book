@@ -1,6 +1,7 @@
 #include "task.h"
 #include "bootfs.h"
 #include <libs/common/elf.h>
+#include <libs/common/wasm.h>
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 #include <libs/user/ipc.h>
@@ -20,30 +21,60 @@ struct task *task_find(task_t tid) {
     return tasks[tid - 1];
 }
 
-// 指定されたELFファイルからタスクを生成する。成功するとタスクID、失敗するとエラーを返す。
-task_t task_spawn(struct bootfs_file *file) {
-    TRACE("launching %s...", file->name);
+// create task from WASM binary
+static task_t task_spawn_from_wasm(struct bootfs_file *file) {
     struct task *task = malloc(sizeof(*task));
     if (!task) {
         PANIC("too many tasks");
     }
 
-    // ELF・プログラムヘッダにアクセスするために、ELFファイルの先頭4096バイトを読み込む。
-    void *file_header = malloc(4096);
-    bootfs_read(file, 0, file_header, PAGE_SIZE);
+    // copy wasm binary
+    // todo: validate size here?
+    size_t size = file->len;
+    wasm_hdr *wasm = malloc(size);
+    bootfs_read(file, 0, wasm, size);
 
-    // ELFファイルかチェックする。
-    elf_ehdr_t *ehdr = (elf_ehdr_t *) file_header;
-    if (memcmp(ehdr->e_ident, ELF_MAGIC, 4) != 0) {
-        WARN("%s: invalid ELF magic", file->name);
-        free(file_header);
+    // validate version
+    if (wasm->version != WASM_VERSION) {
+        WARN("%s: invalid WASM version: %x", file->name, wasm->version);
+        free(wasm);
         return ERR_INVALID_ARG;
     }
+
+    // create WASMVM task
+    error_t tid_or_err = sys_wasmvm(file->name, (uint8_t *) wasm, size, task_self());
+    if (IS_ERROR(tid_or_err)) {
+        return tid_or_err;
+    }
+
+    // init task struct
+    // WASMVM task runs in kernel mode, so page faults do not occur(maybe)
+    task->tid = tid_or_err;
+    task->pager = task_self();
+    task->file_header = wasm;
+    task->watch_tasks = false;
+    strcpy_safe(task->name, sizeof(task->name), file->name);
+    strcpy_safe(task->waiting_for, sizeof(task->waiting_for), "");
+
+    tasks[task->tid - 1] = task;
+    return task->tid;
+}
+
+// create task from elf binary
+static task_t task_spawn_from_elf(struct bootfs_file *file) {
+    struct task *task = malloc(sizeof(*task));
+    if (!task) {
+        PANIC("too many tasks");
+    }
+
+    // read ELF header
+    elf_ehdr_t *ehdr = malloc(PAGE_SIZE);
+    bootfs_read(file, 0, ehdr, PAGE_SIZE);
 
     // 実行可能ファイルかチェックする。
     if (ehdr->e_type != ET_EXEC) {
         WARN("%s: not an executable file", file->name);
-        free(file_header);
+        free(ehdr);
         return ERR_INVALID_ARG;
     }
 
@@ -51,7 +82,7 @@ task_t task_spawn(struct bootfs_file *file) {
     // 十分なはず。
     if (ehdr->e_phnum > 32) {
         WARN("%s: too many program headers", file->name);
-        free(file_header);
+        free(ehdr);
         return ERR_INVALID_ARG;
     }
 
@@ -63,11 +94,11 @@ task_t task_spawn(struct bootfs_file *file) {
 
     // タスク管理構造体を初期化する。
     task->file = file;
-    task->file_header = file_header;
+    task->file_header = ehdr;
     task->tid = tid_or_err;
     task->pager = task_self();
     task->ehdr = ehdr;
-    task->phdrs = (elf_phdr_t *) ((uaddr_t) file_header + ehdr->e_phoff);
+    task->phdrs = (elf_phdr_t *) ((uaddr_t) ehdr + ehdr->e_phoff);
     task->watch_tasks = false;
     strcpy_safe(task->waiting_for, sizeof(task->waiting_for), "");
 
@@ -96,6 +127,23 @@ task_t task_spawn(struct bootfs_file *file) {
     // タスク管理構造体をタスクIDテーブルに登録する。
     tasks[task->tid - 1] = task;
     return task->tid;
+}
+
+task_t task_spawn(struct bootfs_file *file) {
+    TRACE("launching %s...", file->name);
+
+    // read magic number
+    uint8_t magic[0];
+    bootfs_read(file, 0, magic, 4);
+
+    if (memcmp(magic, ELF_MAGIC, 4) == 0) {
+        return task_spawn_from_elf(file);
+    } else if (memcmp(magic, WASM_MAGIC, 4) == 0) {
+        return task_spawn_from_wasm(file);
+    } else {
+        WARN("%s: unknown magic number: %x", file->name, magic);
+        return ERR_INVALID_ARG;
+    }
 }
 
 // タスクを終了させる。

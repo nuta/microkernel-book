@@ -11,6 +11,10 @@ struct task *current;
 static uint8_t global_heap_buf[512 * 1024] = {0};
 
 // host functions exported to WASM
+static void __info(wasm_exec_env_t exec_env, const char *str) {
+    INFO("%s", str);
+}
+
 static void __ipc_reply(wasm_exec_env_t exec_env, task_t dst_tid, struct message *m) {
     // find destination task
     struct task *dst = task_find(dst_tid);
@@ -36,6 +40,7 @@ __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
 
     // init runtime
     static NativeSymbol native_symbols[] = {
+        {"info", __info, "($)", NULL},
         {"ipc_recv", __ipc_recv, "(i$)i", NULL},
         {"ipc_reply", __ipc_reply, "(i$)", NULL}
     };

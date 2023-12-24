@@ -107,8 +107,8 @@ ECHO      ?= echo
 
 # ビルド対象のサーバとライブラリの名前リスト (例: "fs tcpip shell ...")
 all_servers  := $(notdir $(patsubst %/build.mk, %, $(wildcard servers/*/build.mk)))
-core_servers := $(all_servers)
-wasm_servers :=
+core_servers := $(filter-out wasm_hello, $(all_servers))
+wasm_servers := wasm_hello
 all_libs := $(notdir $(patsubst %/build.mk, %, $(wildcard libs/*/build.mk)))
 
 # リンカーとCコンパイラのオプション
