@@ -166,6 +166,7 @@ typedef __builtin_va_list va_list;
 #define SYS_UPTIME       15
 #define SYS_HINAVM       16
 #define SYS_SHUTDOWN     17
+#define SYS_WASMVM       18
 
 // pm_alloc() のフラグ
 #define PM_ALLOC_UNINITIALIZED 0         // ゼロクリアされていなくてもよい

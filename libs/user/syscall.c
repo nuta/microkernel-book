@@ -25,6 +25,10 @@ task_t sys_hinavm(const char *name, hinavm_inst_t *insts, size_t num_insts,
                         0, SYS_HINAVM);
 }
 
+task_t sys_wasmvm(const char *name, uint8_t *wasm, size_t size, task_t pager) {
+    return arch_syscall((uintptr_t) name, (uintptr_t) wasm, size, pager, 0, SYS_WASMVM);
+}
+
 // task_destroyシステムコール: タスクの削除
 error_t sys_task_destroy(task_t task) {
     return arch_syscall(task, 0, 0, 0, 0, SYS_TASK_DESTROY);

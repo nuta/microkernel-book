@@ -1,26 +1,22 @@
+#include "wasmvm.h"
+#include "task.h"
+#include <libs/third_party/wasm-micro-runtime/core/iwasm/include/wasm_export.h>
 #include <libs/common/print.h>
-#include "wasm_export.h"
 
-#define STACK_SIZE  (4096U)
-#define HEAP_SIZE   (4096U)
+// global heap
+static uint8_t global_heap_buf[512 * 1024] = {0};
 
-// defined in main.S
-extern unsigned char wasm_start[];
-extern int wasm_len[];
-
-// host function
-void info(wasm_exec_env_t exec_env, const char *str) {
+// host functions exported to WASM
+static void info(wasm_exec_env_t exec_env, const char *str) {
     INFO("%s", str);
 }
 
-int main(void) {
-    // init runtime
-    static char global_heap_buf[512 * 1024];
+__noreturn void wasmvm_run(struct wasmvm *wasmvm) {
     char error_buf[128];
 
-    // register host functon
+    // init runtime
     static NativeSymbol native_symbols[] = {
-        EXPORT_WASM_API_WITH_SIG(info, "($)")
+        {"info", info, "($)", NULL},
     };
 
     RuntimeInitArgs init_args ={
@@ -32,16 +28,15 @@ int main(void) {
         .native_symbols = native_symbols
     };
 
-    if(!wasm_runtime_full_init(&init_args)) {
+    if (!wasm_runtime_full_init(&init_args)) {
         ERROR("init runtime environment failed");
-        return ERR_ABORTED;
+        task_exit(EXP_GRACE_EXIT);
     }
 
-    // decode
     wasm_module_t module = NULL;
     module = wasm_runtime_load(
-        wasm_start, 
-        wasm_len[0], 
+        wasmvm->code, 
+        wasmvm->size, 
         error_buf, 
         sizeof(error_buf)
     );
@@ -54,8 +49,8 @@ int main(void) {
     wasm_module_inst_t moduleinst = NULL;
     moduleinst = wasm_runtime_instantiate(
         module,
-        STACK_SIZE,
-        HEAP_SIZE,
+        WASMVM_STACK_SIZE,
+        WASMVM_HEAP_SIZE,
         error_buf,
         sizeof(error_buf)
     );
@@ -68,6 +63,7 @@ int main(void) {
     if (!wasm_application_execute_main(moduleinst, 0, argv)) {
         ERROR("main function failed");
     }
+
     INFO("ret = %d", *(int *)argv);
 
     // destroy the module instance  
@@ -79,6 +75,8 @@ int main(void) {
     fail_1:
         // destroy runtime environment
         wasm_runtime_destroy();
-        
-        return 0;
+    
+    // exit
+    task_exit(EXP_GRACE_EXIT);
 }
+ 

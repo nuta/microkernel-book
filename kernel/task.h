@@ -1,6 +1,7 @@
 #pragma once
 #include "arch.h"
 #include "hinavm.h"
+#include "wasmvm.h"
 #include "interrupt.h"
 #include <libs/common/list.h>
 #include <libs/common/message.h>
@@ -46,6 +47,8 @@ extern list_t active_tasks;
 struct task *task_find(task_t tid);
 task_t task_create(const char *name, uaddr_t ip, struct task *pager);
 task_t hinavm_create(const char *name, hinavm_inst_t *insts, uint32_t num_insts,
+                     struct task *pager);
+task_t wasmvm_create(const char *name, uint8_t *wasm, uint32_t size, 
                      struct task *pager);
 error_t task_destroy(struct task *task);
 __noreturn void task_exit(int exception);

@@ -192,6 +192,44 @@ task_t hinavm_create(const char *name, hinavm_inst_t *insts, uint32_t num_insts,
     return tid;
 }
 
+// Create WASMVM task
+task_t wasmvm_create(const char *name, uint8_t *wasm, uint32_t size, 
+                     struct task *pager) {
+    task_t tid = alloc_tid();
+    if (!tid) {
+        return ERR_TOO_MANY_TASKS;
+    }
+
+    struct task *task = &tasks[tid - 1];
+    DEBUG_ASSERT(task != NULL);
+
+    // allocate physical memory
+    size_t wasmvm_size = ALIGN_UP(sizeof(struct wasmvm), PAGE_SIZE);
+    paddr_t wasmvm_paddr = pm_alloc(wasmvm_size, NULL, PM_ALLOC_UNINITIALIZED);
+    if (!wasmvm_paddr) {
+        return ERR_NO_MEMORY;
+    }
+
+    // copy wasm binary
+    struct wasmvm *wasmvm = (struct wasmvm *) arch_paddr_to_vaddr(wasmvm_paddr);
+    memcpy(&wasmvm->code, wasm, size);
+    wasmvm->size = size;
+    
+    error_t err = init_task_struct(task, tid, name, 0, pager, 
+                                    (vaddr_t) wasmvm_run, wasmvm);
+    
+    if (err != OK) {
+        pm_free(wasmvm_paddr, wasmvm_size);
+        return err;
+    }
+
+    pm_own_page(wasmvm_paddr, task);
+    list_push_back(&active_tasks, &task->next);
+    task_resume(task);
+    TRACE("created a WASMVM task \"%s\" (tid=%d)", name, tid);
+    return tid;
+}
+
 // タスクを削除する。taskは削除するタスク。taskが実行中のタスクである場合は、この関数では
 // なく、task_exit関数を呼び出す必要がある。
 error_t task_destroy(struct task *task) {

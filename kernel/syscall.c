@@ -1,6 +1,7 @@
 #include "syscall.h"
 #include "arch.h"
 #include "hinavm.h"
+#include "wasmvm.h"
 #include "interrupt.h"
 #include "ipc.h"
 #include "memory.h"
@@ -104,6 +105,39 @@ static task_t sys_hinavm(__user const char *name, __user hinavm_inst_t *insts,
 
     // HinaVMタスクを作成
     return hinavm_create(namebuf, instsbuf, num_insts, pager_task);
+}
+
+// create WASMVM task
+static task_t sys_wasmvm(__user const char *name, __user uint8_t *wasm,
+                        size_t size, task_t pager) {
+    // get task name
+    char namebuf[TASK_NAME_LEN];
+    error_t err = strcpy_from_user(namebuf, sizeof(namebuf), name);
+    if (err != OK) {
+        return err;
+    }
+
+    // get pager task
+    struct task *pager_task = task_find(pager);
+    if (!pager_task) {
+        return ERR_INVALID_ARG;
+    }
+
+    // validate size
+    if (size > WASMVM_CODE_SIZE_MAX) {
+        WARN("wasm too big: %u (max=%u)", size, WASMVM_CODE_SIZE_MAX);
+        return ERR_INVALID_ARG;
+    }
+
+    // copy wasm binary
+    uint8_t wasmbuf[WASMVM_CODE_SIZE_MAX];
+    err = memcpy_from_user(wasmbuf, wasm, size);
+    if (err != OK) {
+        return err;
+    }
+    
+    // create WASMVM task
+    return wasmvm_create(namebuf, wasmbuf, size, pager_task);
 }
 
 // タスクを削除する。
@@ -352,6 +386,10 @@ long handle_syscall(long a0, long a1, long a2, long a3, long a4, long n) {
         case SYS_HINAVM:
             ret = sys_hinavm((__user const char *) a0,
                              (__user hinavm_inst_t *) a1, a2, a3);
+            break;
+        case SYS_WASMVM:
+            ret = sys_wasmvm((__user const char *) a0,
+                             (__user uint8_t *) a1, a2, a3);
             break;
         case SYS_TIME:
             ret = sys_time(a0);

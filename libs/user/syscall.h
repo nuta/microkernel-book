@@ -10,6 +10,7 @@ error_t sys_notify(task_t dst, notifications_t notifications);
 task_t sys_task_create(const char *name, vaddr_t ip, task_t pager);
 task_t sys_hinavm(const char *name, hinavm_inst_t *insts, size_t num_insts,
                   task_t pager);
+task_t sys_wasmvm(const char *name, uint8_t *wasm, size_t size, task_t pager);
 error_t sys_task_destroy(task_t task);
 __noreturn void sys_task_exit(void);
 task_t sys_task_self(void);
