@@ -10,26 +10,39 @@ struct task *current;
 // global heap
 static uint8_t global_heap_buf[512 * 1024] = {0};
 
+// ipc wrappter
+static error_t __ipc(task_t dst, task_t src, struct message *m, unsigned flags) {
+    // validate src tid
+    if (src < 0 || src > NUM_TASKS_MAX) {
+        return ERR_INVALID_ARG;
+    }
+
+    // get destination if need
+    struct task *dst_task = NULL;
+    if (flags & IPC_SEND) {
+        dst_task = task_find(dst);
+        if (!dst_task) {
+            WARN("%s: invalid task ID %d", current->name, dst);
+            return ERR_INVALID_TASK;
+        }
+    }
+
+    // make compiler happy
+    return ipc(dst_task, src, (__user struct message *) m, flags);
+}
+
 // host functions exported to WASM
 static void __info(wasm_exec_env_t exec_env, const char *str) {
     INFO("%s", str);
 }
 
-static void __ipc_reply(wasm_exec_env_t exec_env, task_t dst_tid, struct message *m) {
-    // find destination task
-    struct task *dst = task_find(dst_tid);
-    if (dst == NULL) {
-        WARN("%s: REPLY: invalid task ID %d", current->name, dst);
-        task_exit(EXP_ILLEGAL_EXCEPTION);
-    }
-
-    error_t err = ipc(dst, 0, (__user struct message *) m, 
-                      IPC_SEND | IPC_NOBLOCK | IPC_KERNEL);
+static void __ipc_reply(wasm_exec_env_t exec_env, task_t dst, struct message *m) {
+    error_t err = __ipc(dst, 0, m, IPC_SEND | IPC_NOBLOCK | IPC_KERNEL);
     OOPS_OK(err);
 }
 
-static error_t __ipc_recv(wasm_exec_env_t exec_env, task_t src_tid, struct message *m) {
-    return ipc(0, src_tid, (__user struct message *) m, IPC_RECV | IPC_KERNEL);
+static error_t __ipc_recv(wasm_exec_env_t exec_env, task_t src, struct message *m) {
+    return __ipc(0, src, m, IPC_RECV | IPC_KERNEL);
 }
 
 __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
