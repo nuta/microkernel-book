@@ -65,7 +65,7 @@ static error_t send_message(struct task *dst, __user struct message *m,
 
     // メッセージを送信して、宛先タスクを再開する
     memcpy(&dst->m, &copied_m, sizeof(struct message));
-    dst->m.src = (flags & IPC_KERNEL) ? FROM_KERNEL : current->tid;
+    dst->m.src = (flags & IPC_KERNEL) && !(flags & IPC_WASMVM) ? FROM_KERNEL : current->tid;
     task_resume(dst);
     return OK;
 }

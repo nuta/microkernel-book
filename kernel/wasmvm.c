@@ -1,6 +1,7 @@
 #include "wasmvm.h"
 #include "task.h"
 #include "ipc.h"
+#include <libs/common/string.h>
 #include <libs/common/print.h>
 #include <libs/third_party/wasm-micro-runtime/core/iwasm/include/wasm_export.h>
 
@@ -28,7 +29,7 @@ static error_t __ipc(task_t dst, task_t src, struct message *m, unsigned flags) 
     }
 
     // make compiler happy
-    return ipc(dst_task, src, (__user struct message *) m, flags);
+    return ipc(dst_task, src, (__user struct message *) m, flags | IPC_KERNEL | IPC_WASMVM);
 }
 
 // host functions exported to WASM
@@ -37,12 +38,26 @@ static void __info(wasm_exec_env_t exec_env, const char *str) {
 }
 
 static void __ipc_reply(wasm_exec_env_t exec_env, task_t dst, struct message *m) {
-    error_t err = __ipc(dst, 0, m, IPC_SEND | IPC_NOBLOCK | IPC_KERNEL);
+    error_t err = __ipc(dst, 0, m, IPC_SEND | IPC_NOBLOCK);
     OOPS_OK(err);
 }
 
 static error_t __ipc_recv(wasm_exec_env_t exec_env, task_t src, struct message *m) {
-    return __ipc(0, src, m, IPC_RECV | IPC_KERNEL);
+    return __ipc(0, src, m, IPC_RECV);
+}
+
+static error_t __ipc_call(wasm_exec_env_t exec_env, task_t dst, struct message *m) {
+    return __ipc(dst, dst, m, IPC_CALL);
+}
+
+static task_t __ipc_lookup(wasm_exec_env_t exec_env, const char *name) {
+    struct message m;
+    m.type = SERVICE_LOOKUP_MSG;
+    strcpy_safe(m.service_lookup.name, sizeof(m.service_lookup.name), name);
+    
+    ASSERT_OK(__ipc(VM_SERVER, VM_SERVER, &m, IPC_CALL));
+    ASSERT(m.type == SERVICE_LOOKUP_REPLY_MSG);
+    return m.service_lookup_reply.task;
 }
 
 __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
@@ -55,7 +70,9 @@ __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
     static NativeSymbol native_symbols[] = {
         {"info", __info, "($)", NULL},
         {"ipc_recv", __ipc_recv, "(i$)i", NULL},
-        {"ipc_reply", __ipc_reply, "(i$)", NULL}
+        {"ipc_reply", __ipc_reply, "(i$)", NULL},
+        {"ipc_call", __ipc_call, "(i$)i", NULL},
+        {"ipc_lookup", __ipc_lookup, "($)i", NULL}
     };
 
     RuntimeInitArgs init_args ={
