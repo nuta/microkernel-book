@@ -1,4 +1,4 @@
-WAMR_ROOT           := $(top_dir)/libs/third_party/wasm-micro-runtime
+WAMR_ROOT           := $(top_dir)/third_party/wasm-micro-runtime
 WAMR_CORE_ROOT      := $(WAMR_ROOT)/core
 WAMR_SHARED_ROOT    := $(WAMR_CORE_ROOT)/shared
 WAMR_IWASM_ROOT     := $(WAMR_CORE_ROOT)/iwasm

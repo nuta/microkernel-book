@@ -1,4 +1,4 @@
-WAMR_IWASM_ROOT := $(top_dir)/libs/third_party/wasm-micro-runtime/core/iwasm
+WAMR_IWASM_ROOT := $(top_dir)/third_party/wasm-micro-runtime/core/iwasm
 libs-y          += wasm
 objs-y          += main.o libgcc.a wasm.o
 extra-deps-y    +=	$(build_dir)/app.wasm

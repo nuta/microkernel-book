@@ -3,7 +3,7 @@
 #include "ipc.h"
 #include <libs/common/string.h>
 #include <libs/common/print.h>
-#include <libs/third_party/wasm-micro-runtime/core/iwasm/include/wasm_export.h>
+#include <third_party/wasm-micro-runtime/core/iwasm/include/wasm_export.h>
 
 // global pointer to curent task
 struct task *current;
