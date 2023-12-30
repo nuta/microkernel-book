@@ -1,0 +1,7 @@
+{
+    "name": "WASMOS Development",
+    "build": {
+       "dockerfile": "Dockerfile"
+    },
+    "postCreateCommand": "pip3 install --user -r tools/requirements.txt"
+ }
