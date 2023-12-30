@@ -1,6 +1,26 @@
-#include <libs/common/print.h>
-#include <libs/common/string.h>
-#include <libs/user/ipc.h>
+#include <kernel/wasmvm.h>
+
+// library functions
+// todo: replace with wasi-libc?
+size_t strlen(const char *s) {
+    size_t len = 0;
+    while (*s != '\0') {
+        len++;
+        s++;
+    }
+    return len;
+}
+
+void *memcpy(void *dst, const void *src, size_t len) {
+    uint8_t *d = dst;
+    const uint8_t *s = src;
+    while (len-- > 0) {
+        *d = *s;
+        d++;
+        s++;
+    }
+    return dst;
+}
 
 static task_t tcpip_server;
 
@@ -15,7 +35,16 @@ static task_t tcpip_server;
     "</body>"                                                                   \
     "</html>\n"
 
-void main(void) {
+#define ASSERT_OK(expr)                                                         \
+    do {                                                                        \
+        __typeof__(expr) __expr = (expr);                                       \
+        if (IS_ERROR(__expr)) {                                                 \
+            goto fail;                                                          \
+        }                                                                       \
+    } while(0)
+
+__attribute__((export_name("main")))
+int main(void) {
     // find tcpip server
     tcpip_server = ipc_lookup("tcpip");
 
@@ -43,9 +72,9 @@ void main(void) {
                 m.tcpip_read.sock = sock;
                 ASSERT_OK(ipc_call(tcpip_server, &m));
 
-                // response(todo: fix this)
+                // response
                 static char buf[] = "HTTP/1.1 200 OK\r\nConnection: close\rContent-Length: 109\r\n\r\n" INDEX_HTML;
-                
+
                 m.type = TCPIP_WRITE_MSG;
                 m.tcpip_write.sock = sock;
                 memcpy(m.tcpip_write.data, buf, sizeof(buf));
@@ -55,8 +84,10 @@ void main(void) {
             }
 
             default:
-                WARN("unknown message type: %s from %d", msgtype2str(m.type),
-                     m.src);
+                goto fail;
         }
     }
+
+    fail:
+        return -1;
 }
