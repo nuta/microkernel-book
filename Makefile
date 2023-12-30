@@ -145,6 +145,13 @@ else
 CFLAGS += -O3 -DRELEASE_BUILD
 endif
 
+# Compiler options to build WASM
+WASM_CFLAGS :=
+WASM_CFLAGS += --target=wasm32 -O0
+WASM_CFLAGS += -fno-builtin -nostdlib -nostdinc
+WASM_CFLAGS += -Wl,--strip-all,--no-entry,--allow-undefined
+WASM_CFLAGS += -I$(top_dir)
+
 # エミュレータ (QEMU) の起動コマンド
 QEMU ?= $(QEMU_PREFIX)qemu-system-riscv32
 QEMUFLAGS += --no-reboot -m 128 -machine virt,aclint=on -bios none
@@ -254,9 +261,7 @@ $(foreach server, $(wasm_servers),                                 	\
 	$(eval dir := servers/$(server))                                \
 	$(eval build_dir := $(BUILD_DIR)/$(dir))                        \
 	$(eval executable := $(BUILD_DIR)/servers/$(server).wasm)      	\
-	$(eval name := $(server))                                       \
 	$(eval srcs-y :=)                                               \
-	$(eval cflags-y := -I$(top_dir))                             	\
 	$(eval include $(dir)/build.mk)                                 \
 	$(eval include $(top_dir)/mk/wasm.mk)                     		\
 )

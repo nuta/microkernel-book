@@ -10,8 +10,6 @@ extern uint32_t wasm_size[];
 void main(void) {
     task_t server = sys_wasmvm("wasm_hello", wasm_start, wasm_size[0], task_self());
     ASSERT_OK(server);
-
-    TRACE("server = %x", server);
     
     // send message to WASMVM task
     struct message m;
