@@ -33,10 +33,6 @@ static error_t __ipc(task_t dst, task_t src, struct message *m, unsigned flags) 
 }
 
 // host functions exported to WASM
-static void __info(wasm_exec_env_t exec_env, const char *str) {
-    INFO("%s", str);
-}
-
 static error_t __ipc_recv_any(struct message *m) {
     error_t err = __ipc(0, IPC_ANY, m, IPC_RECV);
     if (err != OK) {
@@ -100,7 +96,6 @@ __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
 
     // init runtime
     static NativeSymbol native_symbols[] = {
-        {"info", __info, "($)", NULL},
         {"ipc_recv", __ipc_recv, "(i$)i", NULL},
         {"ipc_call", __ipc_call, "(i$)i", NULL},
         {"ipc_lookup", __ipc_lookup, "($)i", NULL}

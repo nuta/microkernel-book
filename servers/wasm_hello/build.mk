@@ -1,1 +1,0 @@
-srcs-y += main.c
