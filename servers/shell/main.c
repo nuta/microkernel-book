@@ -129,7 +129,7 @@ void main(void) {
     ipc_recv(IPC_ANY, &m);
     ASSERT(m.type == NOTIFY_TIMER_MSG);
 
-    printf("\nWelcome to HinaOS!\n\n");
+    printf("\nWelcome to WASMOS!\n\n");
     while (true) {
         printf("\x1b[1mshell> \x1b[0m");
         printf_flush();

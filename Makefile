@@ -162,17 +162,17 @@ QEMUFLAGS += -device virtio-net-device,netdev=net0,bus=virtio-mmio-bus.1
 QEMUFLAGS += -object filter-dump,id=fiter0,netdev=net0,file=virtio-net.pcap
 QEMUFLAGS += -netdev user,id=net0,hostfwd=tcp:127.0.0.1:1234-:80
 
-hinaos_elf     := $(BUILD_DIR)/hinaos.elf
+wasmos_elf     := $(BUILD_DIR)/wasmos.elf
 boot_elf       := $(BUILD_DIR)/servers/vm.elf
 bootfs_bin     := $(BUILD_DIR)/bootfs.bin
 hinafs_img     := $(BUILD_DIR)/hinafs.img
 
-# HinaOSをビルドするコマンド
+# Commands to build WASMOS
 .PHONY: build
-build: $(hinaos_elf) $(hinafs_img)
+build: $(wasmos_elf) $(hinafs_img)
 	$(PROGRESS) GEN $(BUILD_DIR)/compile_commands.json
 	$(PYTHON3) ./tools/merge_compile_commands_json.py -o $(BUILD_DIR)/compile_commands.json $(BUILD_DIR)
-	$(PYTHON3) ./tools/print_build_info.py --kernel-elf $(hinaos_elf) --bootfs-bin $(bootfs_bin) --hinafs-img $(hinafs_img)
+	$(PYTHON3) ./tools/print_build_info.py --kernel-elf $(wasmos_elf) --bootfs-bin $(bootfs_bin) --hinafs-img $(hinafs_img)
 
 # ビルド時に生成されたファイルたちを消すコマンド
 .PHONY: clean
@@ -182,14 +182,14 @@ clean:
 # QEMU (エミュレータ) でHinaOSを試すコマンド
 .PHONY: run
 run: build
-	$(PROGRESS) QEMU $(hinaos_elf)
-	$(QEMU) $(QEMUFLAGS) -kernel $(hinaos_elf)
+	$(PROGRESS) QEMU $(wasmos_elf)
+	$(QEMU) $(QEMUFLAGS) -kernel $(wasmos_elf)
 
 # GDBでQEMUに接続するコマンド (make run GDBSERVER=1 と組み合わせて使う)
 .PHONY: gdb
 gdb:
 	$(PROGRESS) GEN $(BUILD_DIR)/gdbinit
-	$(PYTHON3) ./tools/generate_gdbinit.py -o $(BUILD_DIR)/gdbinit $(hinaos_elf).gdb $(wildcard $(BUILD_DIR)/servers/*.elf.gdb)
+	$(PYTHON3) ./tools/generate_gdbinit.py -o $(BUILD_DIR)/gdbinit $(wasmos_elf).gdb $(wildcard $(BUILD_DIR)/servers/*.elf.gdb)
 	$(PROGRESS) GDB $(BUILD_DIR)/gdbinit
 	$(GDB) -q -ex "source $(BUILD_DIR)/gdbinit"
 
@@ -214,8 +214,8 @@ doctor:
 	$(ECHO) "OBJCOPY: $(shell $(OBJCOPY) --version)"
 	$(ECHO) "MAKE:    $(shell $(MAKE) --version)"
 
-# カーネルの実行ファイルの生成ルール (build/hinaos.elf)
-executable   := $(hinaos_elf)
+# Rules to build kernel executable (build/wasmos.elf)
+executable   := $(wasmos_elf)
 name         := kernel
 dir          := kernel
 build_dir    := $(BUILD_DIR)/kernel

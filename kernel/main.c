@@ -77,7 +77,7 @@ __noreturn static void idle_task(void) {
 // 0番目のCPUのブート処理: カーネルと最初のタスク (VMサーバ) を初期化した後にアイドルタスク
 // として動作する。
 void kernel_main(struct bootinfo *bootinfo) {
-    printf("Booting HinaOS...\n");
+    printf("Booting WASMOS...\n");
     memory_init(bootinfo);
     arch_init();
     task_init_percpu();
