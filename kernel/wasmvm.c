@@ -146,16 +146,36 @@ __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
         goto fail_2;
     }
 
-    char *argv[] = {NULL};
-    if (!wasm_application_execute_main(moduleinst, 0, argv)) {
-        ERROR("main function failed");
+    // find main function
+    wasm_function_inst_t func = NULL;
+    func = wasm_runtime_lookup_function(moduleinst, "main", NULL);
+    if(!func) {
+        ERROR("main function not found\n");
+        goto fail_3;
     }
 
-    INFO("ret = %d", *(int *)argv);
+    // create exec env
+    wasm_exec_env_t exec_env = NULL;
+    exec_env = wasm_runtime_create_exec_env(moduleinst, WASMVM_STACK_SIZE);
+    if(!exec_env) {
+        ERROR("create exec env failed\n");
+        goto fail_3;
+    }
 
-    // destroy the module instance  
-    wasm_runtime_deinstantiate(moduleinst);
-    
+    // invoke main function
+    uint32_t argv[1] = {0};
+    if (!wasm_runtime_call_wasm(exec_env, func, 0, argv)) {
+        ERROR("call main failed");
+    } else {
+        TRACE("result: %d", argv[0]);
+    }
+
+    // destroy exec env
+    wasm_runtime_destroy_exec_env(exec_env);
+
+    fail_3:
+        // destroy the module instance  
+        wasm_runtime_deinstantiate(moduleinst);
     fail_2:
         // unload the module
         wasm_runtime_unload(module);
