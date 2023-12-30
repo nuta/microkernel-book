@@ -37,12 +37,44 @@ static void __info(wasm_exec_env_t exec_env, const char *str) {
     INFO("%s", str);
 }
 
-static void __ipc_reply(wasm_exec_env_t exec_env, task_t dst, struct message *m) {
-    error_t err = __ipc(dst, 0, m, IPC_SEND | IPC_NOBLOCK);
-    OOPS_OK(err);
+static error_t __ipc_recv_any(struct message *m) {
+    error_t err = __ipc(0, IPC_ANY, m, IPC_RECV);
+    if (err != OK) {
+        return err;
+    }
+
+    switch (m->type) {
+        case NOTIFY_MSG: {
+            int index = __builtin_ffsll(m->notify.notifications) - 1;
+            switch (1 << index) {
+                case NOTIFY_ASYNC_START ... NOTIFY_ASYNC_END: {
+                    task_t src = index - NOTIFY_ASYNC_BASE;
+                    m->type = ASYNC_RECV_MSG;
+                    return __ipc(src, src, m, IPC_CALL);
+                    break;
+                }
+
+                default:
+                    PANIC(
+                        "unhandled notification: %x (index=%d)", 
+                        m->notify.notifications,
+                        index
+                    );
+            }
+        }
+
+        default:
+            if (IS_ERROR(m->type)) {
+                return m->type;
+            }
+            return OK;
+    }
 }
 
 static error_t __ipc_recv(wasm_exec_env_t exec_env, task_t src, struct message *m) {
+    if (src == IPC_ANY) {
+        return __ipc_recv_any(m);
+    }
     return __ipc(0, src, m, IPC_RECV);
 }
 
@@ -70,7 +102,6 @@ __noreturn void wasmvm_run(struct wasmvm *wasmvm) {
     static NativeSymbol native_symbols[] = {
         {"info", __info, "($)", NULL},
         {"ipc_recv", __ipc_recv, "(i$)i", NULL},
-        {"ipc_reply", __ipc_reply, "(i$)", NULL},
         {"ipc_call", __ipc_call, "(i$)i", NULL},
         {"ipc_lookup", __ipc_lookup, "($)i", NULL}
     };
