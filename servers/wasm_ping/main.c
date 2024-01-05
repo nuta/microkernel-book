@@ -1,4 +1,4 @@
-#include <kernel/wasmvm.h>
+#include <libs/wasm/ipc.h>
 
 __attribute__((export_name("main")))
 int main(void) {

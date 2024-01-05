@@ -1,4 +1,4 @@
-#include <kernel/wasmvm.h>
+#include <libs/wasm/ipc.h>
 
 #define ASSERT_OK(expr)                                                         \
     do {                                                                        \

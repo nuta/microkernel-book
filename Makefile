@@ -93,6 +93,7 @@ endif
 #
 CC        := $(LLVM_PREFIX)clang$(LLVM_SUFFIX)
 LD        := $(LLVM_PREFIX)ld.lld$(LLVM_SUFFIX)
+WASMLD    := wasm-ld
 OBJCOPY   := $(LLVM_PREFIX)llvm-objcopy$(LLVM_SUFFIX)
 AR 		  := $(LLVM_PREFIX)llvm-ar$(LLVM_SUFFIX)
 ADDR2LINE := $(LLVM_PREFIX)llvm-addr2line$(LLVM_SUFFIX)
@@ -145,12 +146,15 @@ else
 CFLAGS += -O3 -DRELEASE_BUILD
 endif
 
-# Compiler options to build WASM
-WASM_CFLAGS :=
-WASM_CFLAGS += --target=wasm32 -O0
-WASM_CFLAGS += -fno-builtin -nostdlib -nostdinc
-WASM_CFLAGS += -Wl,--strip-all,--no-entry,--allow-undefined
-WASM_CFLAGS += -I$(top_dir)
+# Compiler flags to build .wasm
+WASMCFLAGS := $(filter-out -mno-relax -fsanitize=undefined, $(CFLAGS))
+WASMCFLAGS += --target=wasm32
+
+# Linker flags to build .wasm
+WASMLDFLAGS :=
+WASMLDFLAGS += --strip-all
+WASMLDFLAGS += --no-entry
+WASMLDFLAGS += --allow-undefined
 
 # エミュレータ (QEMU) の起動コマンド
 QEMU ?= $(QEMU_PREFIX)qemu-system-riscv32
@@ -257,11 +261,17 @@ $(foreach server, $(core_servers),                                	\
 )
 
 # Build rule for wasm servers (build/servers/*.wasm)
-$(foreach server, $(wasm_servers),                                 	\
+$(foreach server, $(wasm_servers),                                	\
 	$(eval dir := servers/$(server))                                \
 	$(eval build_dir := $(BUILD_DIR)/$(dir))                        \
 	$(eval executable := $(BUILD_DIR)/servers/$(server).wasm)      	\
-	$(eval srcs-y :=)                                               \
+	$(eval name := $(server))                                       \
+	$(eval objs-y :=)                                               \
+	$(eval libs-y := wasm)                                   		\
+	$(eval cflags-y :=)                                             \
+	$(eval ldflags-y :=)   											\
+	$(eval subdirs-y :=)                                            \
+	$(eval extra-deps-y :=)  										\
 	$(eval include $(dir)/build.mk)                                 \
 	$(eval include $(top_dir)/mk/wasm.mk)                     		\
 )
@@ -271,6 +281,13 @@ $(BUILD_DIR)/%.o: %.c Makefile $(BUILD_DIR)/consts.mk libs/common/ipcstub.h
 	$(PROGRESS) CC $<
 	$(MKDIR) -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $< -MD -MF $(@:.o=.deps) -MJ $(@:.o=.json)
+
+# Build rule for *.wasm.o
+# Remove compiler flags specific to riscv and add ones for WAS
+$(BUILD_DIR)/%.wasm.o: %.c Makefile $(BUILD_DIR)/consts.mk libs/common/ipcstub.h
+	$(PROGRESS) CC $<
+	$(MKDIR) -p $(@D)
+	$(CC) $(WASMCFLAGS) -c -o $@ $< -MD -MF $(@:.o=.deps) -MJ $(@:.o=.json)
 
 # ビルドディレクトリ下にある (自動生成される) Cファイルのコンパイル規則
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.c Makefile $(BUILD_DIR)/consts.mk libs/common/ipcstub.h

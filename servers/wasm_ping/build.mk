@@ -1,1 +1,1 @@
-srcs-y += main.c
+objs-y += main.wasm.o

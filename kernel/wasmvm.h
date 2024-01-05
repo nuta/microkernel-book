@@ -12,11 +12,5 @@ struct wasmvm {
     uint32_t    size;
 };
 
-// host functions exported to WASM (defined in wasmvm.c)
-void ipc_reply(task_t dst, struct message *m);
-error_t ipc_recv(task_t src, struct message *m);
-error_t ipc_call(task_t dst, struct message *m);
-task_t ipc_lookup(const char *name);
-
 // entry point of WASMVM task
 __noreturn void wasmvm_run(struct wasmvm *wasmvm);
