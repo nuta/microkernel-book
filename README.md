@@ -32,9 +32,6 @@ start wasm_ping     # Run a wasm binary that uses message passing APIs
 start wasm_webapi   # Run a toy web server (wasm binary). Access localhost:1234 to see the page
 ```
 
-## Community
-- [Discord](https://discord.gg/2GSyzpFxrH)
-
 ## Contributing
 We accept bug reports, feature requests, and patches on [GitHub](https://github.com/r1ru/wasmos).
 
