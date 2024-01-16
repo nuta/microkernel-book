@@ -8,7 +8,7 @@ extern uint8_t wasm_start[];
 extern uint32_t wasm_size[];
 
 void main(void) {
-    task_t server = sys_wasmvm("wasm_hello", wasm_start, wasm_size[0], task_self());
+    task_t server = sys_wasmvm("wasm_pong", wasm_start, wasm_size[0], task_self());
     ASSERT_OK(server);
     
     // send message to WASMVM task
