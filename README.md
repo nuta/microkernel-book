@@ -21,7 +21,7 @@ If you're not using it, please refer to the [Dockerfile](https://github.com/r1ru
 make                # Build wasmos
 make V=1            # Build wasmos (Output detailed build logs)
 make run            # Run wasmos in qemu (single core)
-make run CORE=4     # Run wasmos in qemu (4 cores)
+make run CPUS=4     # Run wasmos in qemu (4 cores)
 ```
 If it starts successfully, the shell server is launched and you can execute following commands.
 
