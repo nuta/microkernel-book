@@ -36,6 +36,9 @@ void __ubsan_handle_sub_overflow(void) {
 void __ubsan_handle_mul_overflow(void) {
     report_ubsan_event("mul overflow");
 }
+void __ubsan_handle_function_type_mismatch(void) {
+    report_ubsan_event("__ubsan_handle_function_type_mismatch");
+}
 void __ubsan_handle_divrem_overflow(void) {
     report_ubsan_event("divrem overflow");
 }
