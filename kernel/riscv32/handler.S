@@ -11,7 +11,7 @@ riscv32_trap_handler:
 
     // カーネルモードで割り込みが発生した際にはカーネルスタックをそのまま利用する。
     csrr a0, sstatus
-    andi a0, a0, (1 << 8)      // SPPビット: 0ならカーネルモードで発生。
+    andi a0, a0, (1 << 8)      // SPPビット: 1ならカーネルモードで発生。
     bnez a0, 1f
 
     lw a0, CPUVAR_SP_TOP(tp)   // a0レジスタに実行中タスクのカーネルスタックを設定。
