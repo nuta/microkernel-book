@@ -65,12 +65,20 @@ $ pip3 install --user -r tools/requirements.txt
 macOS 13 (Ventura) の場合は次のコマンドで必要なパッケージをインストールできます。
 
 ```
-$ brew install llvm python3 qemu riscv-software-src/riscv/riscv-tools
+$ brew install llvm lld python3 qemu riscv-software-src/riscv/riscv-tools
 $ cd <HinaOSのディレクトリ>
 $ pip3 install --user -r tools/requirements.txt
 ```
 
-> **Note**
+> [!NOTE]
+>
+> macOS上で `ld.lld` コマンドが見つからないというエラーが出る場合は、次の通りに `lld` パッケージをインストールしてください。
+>
+> ```
+> brew install lld
+> ```
+
+> [!NOTE]
 >
 > Windowsでもwingetを利用して上記のパッケージをインストールすることでネイティブな開発環境を構築できます（詳細なステップは本書の付録で解説しています）。ただし環境構築がかえって面倒であるため、[WSL2](https://learn.microsoft.com/ja-jp/windows/wsl/install)上でUbuntuを利用するのがお勧めです。
 
