@@ -55,7 +55,7 @@ jobs:
       - name: Install packages
         run: brew install llvm python3 qemu
       - name: Install pip packages
-        run: pip3 install --user -r tools/requirements.txt
+        run: pip3 install --user --break-system-packages -r tools/requirements.txt
       - name: make doctor
         run: make doctor
       - name: Debug build
