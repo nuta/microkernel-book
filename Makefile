@@ -60,6 +60,10 @@ ifeq ($(OS),Windows_NT)
         # https://winget.run/pkg/LLVM/LLVM
         LLVM_PREFIX = "C:/Program Files/llvm/bin/"
     endif
+
+    ifeq ($(LLD_PREFIX),)
+        LLD_PREFIX = "C:/Program Files/llvm/bin/"
+    endif
 else
     top_dir := $(shell pwd)
     RM := rm
@@ -75,6 +79,10 @@ else
 
         ifeq ($(LLVM_PREFIX),)
             LLVM_PREFIX = $(HOMEBREW_PREFIX)/opt/llvm/bin/
+        endif
+
+        ifeq ($(LLD_PREFIX),)
+	    LLD_PREFIX = $(HOMEBREW_PREFIX)/opt/lld/bin/
         endif
     endif
 endif
@@ -92,7 +100,7 @@ endif
 #  ビルドに必要なコマンド
 #
 CC        := $(LLVM_PREFIX)clang$(LLVM_SUFFIX)
-LD        := $(LLVM_PREFIX)ld.lld$(LLVM_SUFFIX)
+LD        := $(LLD_PREFIX)ld.lld$(LLVM_SUFFIX)
 OBJCOPY   := $(LLVM_PREFIX)llvm-objcopy$(LLVM_SUFFIX)
 ADDR2LINE := $(LLVM_PREFIX)llvm-addr2line$(LLVM_SUFFIX)
 NM        := $(LLVM_PREFIX)llvm-nm$(LLVM_SUFFIX)
