@@ -64,9 +64,9 @@ typedef __builtin_va_list va_list;
 #define STATIC_ASSERT(expr, summary) _Static_assert(expr, summary);
 // 構造体のメンバのオフセットを取得する
 #define offsetof(type, field) __builtin_offsetof(type, field)
-// 与えられた値を指定されたアライメントに合うように切り上げる
-#define ALIGN_DOWN(value, align) __builtin_align_down(value, align)
 // 与えられた値を指定されたアライメントに合うように切り下げる
+#define ALIGN_DOWN(value, align) __builtin_align_down(value, align)
+// 与えられた値を指定されたアライメントに合うように切り上げる
 #define ALIGN_UP(value, align) __builtin_align_up(value, align)
 // 与えられた値が指定されたアライメントに合っているかどうかを判定する
 #define IS_ALIGNED(value, align) __builtin_is_aligned(value, align)
